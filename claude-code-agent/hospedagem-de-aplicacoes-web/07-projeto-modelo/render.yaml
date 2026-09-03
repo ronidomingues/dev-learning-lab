@@ -1,0 +1,45 @@
+# Blueprint do Render: API + PostgreSQL + Key Value, tudo versionado.
+# Painel → New → Blueprint → aponte para este repositório.
+#
+# ATENÇÃO ao plano free do banco: ele EXPIRA 30 dias após a criação
+# (14 dias de carência antes de ser apagado). Para algo que precise durar,
+# troque `plan: free` por `plan: basic-256mb` no bloco `databases`.
+services:
+  - type: web
+    name: encurtalink
+    runtime: node
+    plan: free                 # troque para "starter" (US$ 7/mês) e o serviço deixa de dormir
+    region: oregon             # o Render não tem região no Brasil (ago/2026)
+    branch: main
+    rootDir: hospedagem-de-aplicacoes-web/07-projeto-modelo
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BASE_URL
+        sync: false            # preencha no painel com a URL pública final
+      - key: DATABASE_URL
+        fromDatabase:
+          name: encurtalink-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: encurtalink-cache
+          property: connectionString
+
+  - type: keyvalue
+    name: encurtalink-cache
+    plan: free                 # 25 MB, sem persistência: perfeito para cache, péssimo para fila
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []            # vazio = alcançável só pela rede interna do Render
+
+databases:
+  - name: encurtalink-db
+    plan: free
+    region: oregon
+    postgresMajorVersion: "18"

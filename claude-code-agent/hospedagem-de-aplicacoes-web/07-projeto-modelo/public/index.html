@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EncurtaLink</title>
+<style>
+  :root { color-scheme: light dark; --borda: #8883; }
+  body { font: 16px/1.5 system-ui, sans-serif; margin: 0 auto; padding: 2rem 1rem; max-width: 44rem; }
+  h1 { margin-bottom: .25rem; }
+  p.sub { color: #888; margin-top: 0; }
+  form { display: flex; gap: .5rem; flex-wrap: wrap; margin: 1.5rem 0; }
+  input { flex: 1 1 14rem; padding: .6rem .7rem; border: 1px solid var(--borda); border-radius: .4rem; font: inherit; }
+  button { padding: .6rem 1.1rem; border: 0; border-radius: .4rem; background: #2563eb; color: #fff; font: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: progress; }
+  .caixa { border: 1px solid var(--borda); border-radius: .5rem; padding: 1rem; margin: 1rem 0; }
+  .erro { border-color: #dc2626; color: #dc2626; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: .4rem .3rem; border-bottom: 1px solid var(--borda); }
+  code { background: #8881; padding: .1rem .3rem; border-radius: .25rem; }
+  .fonte { font-size: .85rem; color: #888; }
+</style>
+</head>
+<body>
+  <h1>EncurtaLink</h1>
+  <p class="sub">Projeto-modelo do curso de hospedagem — backend + PostgreSQL + Redis + frontend.</p>
+
+  <form id="form">
+    <input id="destino" type="url" placeholder="https://exemplo.com/uma/url/bem/longa" required>
+    <input id="slug" type="text" placeholder="apelido (opcional)" pattern="[2-9a-zA-Z]{3,32}">
+    <button id="botao" type="submit">Encurtar</button>
+  </form>
+
+  <div id="resultado" hidden class="caixa"></div>
+
+  <h2>Mais clicados</h2>
+  <div id="stats" class="caixa">carregando…</div>
+
+<script>
+// Mesma origem: o frontend é servido pelo próprio backend. Se você publicar o
+// frontend na Cloudflare Pages e o backend no Render, troque API pela URL do backend
+// e configure CORS_ORIGEM no backend.
+const API = "";
+
+const $ = (id) => document.getElementById(id);
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("botao").disabled = true;
+  const caixa = $("resultado");
+  caixa.hidden = false;
+  caixa.className = "caixa";
+  caixa.textContent = "criando…";
+
+  try {
+    const r = await fetch(`${API}/api/links`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ destino: $("destino").value, slug: $("slug").value || undefined }),
+    });
+    const dados = await r.json();
+
+    if (!r.ok) {
+      caixa.className = "caixa erro";
+      // 429 tem Retry-After: mostrar isso é a diferença entre um erro útil e um inútil.
+      const espera = r.headers.get("retry-after");
+      caixa.textContent = `Erro (${dados.codigo}): ${dados.erro}` + (espera ? ` — tente em ${espera}s` : "");
+      return;
+    }
+
+    caixa.innerHTML =
+      `<strong>Pronto:</strong> <a href="${dados.url_curta}"><code>${dados.url_curta}</code></a>` +
+      `<div class="fonte">aponta para ${dados.destino}</div>`;
+    $("destino").value = ""; $("slug").value = "";
+    carregarStats();
+  } catch (err) {
+    caixa.className = "caixa erro";
+    caixa.textContent = "falha de rede: " + err.message;
+  } finally {
+    $("botao").disabled = false;
+  }
+});
+
+async function carregarStats() {
+  try {
+    const r = await fetch(`${API}/api/stats`);
+    const { links, fonte } = await r.json();
+    if (!links.length) { $("stats").textContent = "nenhum link ainda."; return; }
+    $("stats").innerHTML =
+      "<table><tr><th>apelido</th><th>destino</th><th>cliques</th></tr>" +
+      links.map((l) => `<tr><td><a href="/${l.slug}"><code>${l.slug}</code></a></td>` +
+        `<td>${l.destino.slice(0, 48)}</td><td>${l.cliques}</td></tr>`).join("") +
+      `</table><div class="fonte">fonte: ${fonte}</div>`;
+  } catch {
+    $("stats").textContent = "não foi possível carregar.";
+  }
+}
+carregarStats();
+setInterval(carregarStats, 15000);
+</script>
+</body>
+</html>
