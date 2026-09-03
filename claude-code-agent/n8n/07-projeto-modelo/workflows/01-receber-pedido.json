@@ -1,0 +1,108 @@
+{
+  "id": "cp01receberpedido",
+  "name": "CP · 01 Receber pedido",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "pedido", "responseMode": "responseNode", "options": {} },
+      "id": "cp010000-0000-0000-0000-000000000001",
+      "name": "Webhook POST /pedido",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-200, 0],
+      "webhookId": "cp010000-0000-0000-0000-0000000000ff"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valida e normaliza o pedido que chegou pelo webhook.\n// Regra da casa: nunca deixe entrar dado que voce nao consegue processar depois.\nconst body = $json.body ?? {};\nconst erros = [];\n\nconst pedidoId = String(body.pedido_id ?? '').trim();\nif (!pedidoId) erros.push('pedido_id obrigatorio');\n\nconst cliente = String(body.cliente ?? '').trim();\nif (!cliente) erros.push('cliente obrigatorio');\n\nconst valor = body.valor;\nif (typeof valor !== 'number' || Number.isNaN(valor)) erros.push('valor deve ser numero');\nelse if (valor <= 0) erros.push('valor deve ser maior que zero');\n\nconst itens = Array.isArray(body.itens) ? body.itens : [];\nif (itens.length === 0) erros.push('itens deve ser uma lista nao vazia');\n\nreturn [{\n  json: {\n    ok: erros.length === 0,\n    erros,\n    pedido: {\n      pedido_id: pedidoId,\n      cliente,\n      valor: typeof valor === 'number' ? valor : null,\n      itens,\n      recebido_em: $now.toISO()\n    }\n  }\n}];"
+      },
+      "id": "cp010000-0000-0000-0000-000000000002",
+      "name": "Validar e normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [20, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            { "id": "cond-ok", "leftValue": "={{ $json.ok }}", "rightValue": "", "operator": { "type": "boolean", "operation": "true", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cp010000-0000-0000-0000-000000000003",
+      "name": "E valido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'aceito', pedido_id: $json.pedido.pedido_id }) }}",
+        "options": { "responseCode": 202 }
+      },
+      "id": "cp010000-0000-0000-0000-000000000004",
+      "name": "Responder 202 Aceito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [480, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'rejeitado', erros: $json.erros }) }}",
+        "options": { "responseCode": 400 }
+      },
+      "id": "cp010000-0000-0000-0000-000000000005",
+      "name": "Responder 400 Rejeitado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [480, 120]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO pedidos (pedido_id, cliente, valor, itens, recebido_em)\nVALUES ($1, $2, $3, $4::jsonb, $5)\nON CONFLICT (pedido_id) DO NOTHING\nRETURNING pedido_id, cliente, valor;",
+        "options": {
+          "queryReplacement": "={{ $json.pedido.pedido_id }},{{ $json.pedido.cliente }},{{ $json.pedido.valor }},{{ JSON.stringify($json.pedido.itens) }},{{ $json.pedido.recebido_em }}"
+        }
+      },
+      "id": "cp010000-0000-0000-0000-000000000006",
+      "name": "Gravar pedido (idempotente)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [700, -100],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": { "postgres": { "id": "cpcredpostgres001", "name": "Postgres central-de-pedidos" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// A insercao e idempotente: ON CONFLICT DO NOTHING nao devolve linha\n// quando o pedido ja existia. Isso e informacao, nao erro.\nconst gravou = $input.all().some(i => i.json && i.json.pedido_id);\nreturn [{ json: { gravado_agora: gravou, duplicado: !gravou, quando: $now.toISO() } }];"
+      },
+      "id": "cp010000-0000-0000-0000-000000000007",
+      "name": "Resultado da gravacao",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, -100]
+    }
+  ],
+  "connections": {
+    "Webhook POST /pedido": { "main": [[{ "node": "Validar e normalizar", "type": "main", "index": 0 }]] },
+    "Validar e normalizar": { "main": [[{ "node": "E valido?", "type": "main", "index": 0 }]] },
+    "E valido?": {
+      "main": [
+        [{ "node": "Responder 202 Aceito", "type": "main", "index": 0 }],
+        [{ "node": "Responder 400 Rejeitado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Responder 202 Aceito": { "main": [[{ "node": "Gravar pedido (idempotente)", "type": "main", "index": 0 }]] },
+    "Gravar pedido (idempotente)": { "main": [[{ "node": "Resultado da gravacao", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true }
+}

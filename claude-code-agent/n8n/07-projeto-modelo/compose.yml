@@ -1,0 +1,69 @@
+# central-de-pedidos — pilha minima porem completa
+# n8n + PostgreSQL. Nada de sandbox de IA: este projeto nao precisa,
+# e sem ele a pilha roda confortavelmente em 2 GB de RAM.
+
+volumes:
+  n8n_data:
+  db_data:
+
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # Postgres 18 mudou o diretorio padrao de dados.
+      # Sem esta linha, o banco e escrito FORA do volume e some no proximo boot.
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # scripts em docker-entrypoint-initdb.d rodam UMA VEZ, no primeiro boot
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: n8nio/n8n:2.36.9
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5678:5678"
+    environment:
+      # --- banco do proprio n8n (workflows, credenciais, execucoes) ---
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # --- a chave que cifra as credenciais. PERDEU = PERDEU AS CREDENCIAIS ---
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+
+      # --- fuso: TZ e do sistema, GENERIC_TIMEZONE e dos agendamentos ---
+      TZ: ${TZ}
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE}
+
+      # --- higiene: sem isto o banco de execucoes cresce ate encher o disco ---
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "168"
+      EXECUTIONS_DATA_PRUNE_MAX_COUNT: "10000"
+
+      # --- seguranca basica ---
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # onde o workflow 03 grava os relatorios; aparece na sua pasta ./saida
+      - ./saida:/files
+      # so para os comandos de importacao (make importar)
+      - ./workflows:/import/workflows:ro
+      - ./credenciais:/import/credenciais:ro

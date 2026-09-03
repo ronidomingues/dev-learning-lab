@@ -1,0 +1,17 @@
+[
+  {
+    "id": "cpcredpostgres001",
+    "name": "Postgres central-de-pedidos",
+    "type": "postgres",
+    "data": {
+      "host": "postgres",
+      "port": 5432,
+      "database": "pedidos",
+      "user": "n8n",
+      "password": "troque-esta-senha",
+      "ssl": "disable",
+      "allowUnauthorizedCerts": false,
+      "maxConnections": 100
+    }
+  }
+]

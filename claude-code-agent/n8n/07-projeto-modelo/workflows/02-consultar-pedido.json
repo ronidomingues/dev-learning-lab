@@ -1,0 +1,81 @@
+{
+  "id": "cp02consultarped",
+  "name": "CP · 02 Consultar pedido",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "GET", "path": "pedido", "responseMode": "responseNode", "options": {} },
+      "id": "cp020000-0000-0000-0000-000000000001",
+      "name": "Webhook GET /pedido",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-200, 0],
+      "webhookId": "cp020000-0000-0000-0000-0000000000ff"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT pedido_id, cliente, valor, itens, recebido_em\nFROM pedidos\nWHERE pedido_id = $1;",
+        "options": { "queryReplacement": "={{ $json.query.id }}" }
+      },
+      "id": "cp020000-0000-0000-0000-000000000002",
+      "name": "Buscar no banco",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [40, 0],
+      "alwaysOutputData": true,
+      "credentials": { "postgres": { "id": "cpcredpostgres001", "name": "Postgres central-de-pedidos" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            { "id": "cond-achou", "leftValue": "={{ $json.pedido_id }}", "rightValue": "", "operator": { "type": "string", "operation": "exists", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cp020000-0000-0000-0000-000000000003",
+      "name": "Achou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [280, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "cp020000-0000-0000-0000-000000000004",
+      "name": "Responder 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ erro: 'pedido nao encontrado', id: $('Webhook GET /pedido').first().json.query.id ?? null }) }}",
+        "options": { "responseCode": 404 }
+      },
+      "id": "cp020000-0000-0000-0000-000000000005",
+      "name": "Responder 404",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, 120]
+    }
+  ],
+  "connections": {
+    "Webhook GET /pedido": { "main": [[{ "node": "Buscar no banco", "type": "main", "index": 0 }]] },
+    "Buscar no banco": { "main": [[{ "node": "Achou?", "type": "main", "index": 0 }]] },
+    "Achou?": {
+      "main": [
+        [{ "node": "Responder 200", "type": "main", "index": 0 }],
+        [{ "node": "Responder 404", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

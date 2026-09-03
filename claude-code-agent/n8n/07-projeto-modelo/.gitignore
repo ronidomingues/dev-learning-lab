@@ -1,0 +1,4 @@
+.env
+saida/*
+!saida/.gitkeep
+credenciais/postgres.json

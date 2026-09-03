@@ -1,0 +1,44 @@
+{
+  "id": "cp04alertafalhas",
+  "name": "CP · 04 Alerta de falhas",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "cp040000-0000-0000-0000-000000000001",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [-200, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// O Error Trigger entrega um objeto com o que falhou.\n// Reduzimos a um registro plano, pronto para gravar e para ler as 3 da manha.\nconst e = $json;\nreturn [{\n  json: {\n    workflow_nome: e.workflow?.name ?? null,\n    workflow_id:   e.workflow?.id ?? null,\n    execucao_id:   e.execution?.id ?? null,\n    execucao_url:  e.execution?.url ?? null,\n    ultimo_no:     e.execution?.lastNodeExecuted ?? null,\n    mensagem:      e.execution?.error?.message ?? 'sem mensagem',\n    quando:        $now.toISO()\n  }\n}];"
+      },
+      "id": "cp040000-0000-0000-0000-000000000002",
+      "name": "Formatar falha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [20, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO erros (workflow_nome, execucao_id, execucao_url, ultimo_no, mensagem, quando)\nVALUES ($1, $2, $3, $4, $5, $6);",
+        "options": {
+          "queryReplacement": "={{ $json.workflow_nome }},{{ $json.execucao_id }},{{ $json.execucao_url }},{{ $json.ultimo_no }},{{ $json.mensagem }},{{ $json.quando }}"
+        }
+      },
+      "id": "cp040000-0000-0000-0000-000000000003",
+      "name": "Registrar no banco",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [240, 0],
+      "credentials": { "postgres": { "id": "cpcredpostgres001", "name": "Postgres central-de-pedidos" } }
+    }
+  ],
+  "connections": {
+    "Error Trigger": { "main": [[{ "node": "Formatar falha", "type": "main", "index": 0 }]] },
+    "Formatar falha": { "main": [[{ "node": "Registrar no banco", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
