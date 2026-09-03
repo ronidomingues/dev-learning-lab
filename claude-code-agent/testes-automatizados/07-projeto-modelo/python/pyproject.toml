@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assinaturas"
+version = "1.0.0"
+description = "Projeto-modelo de testes automatizados — gestão de assinaturas recorrentes"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+# Só o que os testes precisam. A biblioteca em si não tem dependência nenhuma.
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "hypothesis>=6.100",
+]
+
+[project.scripts]
+assinaturas = "assinaturas.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["assinaturas*"]
+
+# ---------------------------------------------------------------------------
+# Configuração do pytest. Fica aqui, não em pytest.ini, para haver um só
+# arquivo de configuração do projeto.
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+
+# --import-mode=importlib: modo recomendado desde o pytest 8; evita a bagunça
+#   de sys.path do modo "prepend" antigo e dispensa __init__.py em tests/.
+# --strict-markers: marcador não declarado abaixo vira ERRO, não aviso.
+#   Sem isso, um typo em `@pytest.mark.integraçao` faz o teste ser ignorado em
+#   silêncio — e você acha que tem cobertura que não tem.
+# --strict-config: erro em chave de configuração desconhecida.
+# -ra: resumo no fim com o motivo de cada teste pulado/falho.
+addopts = [
+  "--import-mode=importlib",
+  "--strict-markers",
+  "--strict-config",
+  "-ra",
+]
+
+markers = [
+  "integracao: toca I/O real (banco, arquivo). Excluir com -m 'not integracao'",
+  "propriedade: teste baseado em propriedades (Hypothesis), mais lento",
+  "lento: leva mais de 1 segundo",
+]
+
+# Aviso virando erro: um DeprecationWarning da sua própria stack é um bug
+# com data marcada. Melhor descobrir agora do que na atualização de versão.
+filterwarnings = [
+  "error",
+  # exemplo de exceção necessária, com motivo e prazo:
+  # "ignore:datetime.utcnow.*:DeprecationWarning:algumadep",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["assinaturas"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "\\.\\.\\.$",            # corpo de Protocol
+]
+# Meta deliberadamente < 100%: o esqueleto HTTP do gateway não é coberto por
+# teste unitário, e forçar 100% aqui só produziria teste de mentira.
+fail_under = 90

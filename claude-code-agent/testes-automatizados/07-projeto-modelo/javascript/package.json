@@ -1,0 +1,25 @@
+{
+  "name": "assinaturas",
+  "version": "1.0.0",
+  "description": "Projeto-modelo de testes automatizados — gestão de assinaturas recorrentes",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "bin": {
+    "assinaturas": "./src/cli.js"
+  },
+  "scripts": {
+    "demo": "node src/cli.js demo",
+    "test": "node --test",
+    "test:unit": "node --test test/dinheiro.test.js test/data.test.js test/plano.test.js test/assinatura.test.js test/servico.test.js test/relogio.test.js test/contratoRepositorio.test.js test/cli.test.js",
+    "test:integracao": "node --test test/*.integracao.test.js",
+    "test:watch": "node --test --watch",
+    "test:cov": "node --test --experimental-test-coverage",
+    "test:vitest": "vitest run",
+    "test:vitest:cov": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
+  }
+}
