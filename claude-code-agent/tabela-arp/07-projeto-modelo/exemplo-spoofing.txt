@@ -1,0 +1,7 @@
+10.0.0.1 dev eth0 lladdr aa:bb:cc:00:00:01 REACHABLE
+10.0.0.1 dev eth0 lladdr de:ad:be:ef:00:99 STALE
+10.0.0.50 dev eth0 lladdr 00:50:56:11:22:33 REACHABLE
+10.0.0.51 dev eth0 lladdr 00:50:56:11:22:33 REACHABLE
+10.0.0.52 dev eth0 lladdr 00:50:56:11:22:33 REACHABLE
+10.0.0.53 dev eth0 lladdr 00:50:56:11:22:33 REACHABLE
+10.0.0.99 dev eth0 FAILED
