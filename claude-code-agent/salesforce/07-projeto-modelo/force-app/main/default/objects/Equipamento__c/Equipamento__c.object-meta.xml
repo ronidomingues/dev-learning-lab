@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Equipamento</label>
+    <pluralLabel>Equipamentos</pluralLabel>
+    <description>Equipamento instalado no cliente, sujeito a manutenção.</description>
+    <nameField>
+        <label>Código</label>
+        <type>AutoNumber</type>
+        <displayFormat>EQP-{0000}</displayFormat>
+        <trackHistory>false</trackHistory>
+    </nameField>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <!-- OWD ReadWrite: quem enxerga o objeto pode editar qualquer registro.
+         Numa org real, o mais comum e' Private + sharing rules. Ver 13-seguranca. -->
+    <sharingModel>ReadWrite</sharingModel>
+    <enableActivities>true</enableActivities>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableFeeds>false</enableFeeds>
+    <enableBulkApi>true</enableBulkApi>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <visibility>Public</visibility>
+</CustomObject>

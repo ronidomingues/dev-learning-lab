@@ -1,0 +1,50 @@
+-- Consultas de verificação do projeto-modelo.
+-- Rode uma por vez com:  sf data query --query "<cole aqui>"
+-- Ou abra este arquivo no VS Code e use SFDX: Execute SOQL Query (extensão SOQL Builder).
+
+-- 1. Estado geral dos equipamentos, com a contagem de OS abertas (rollup nativo)
+SELECT Name, Numero_Serie__c, Status__c, Criticidade__c, OS_Abertas__c,
+       Ultima_Manutencao__c, Conta__r.Name
+FROM Equipamento__c
+ORDER BY Numero_Serie__c
+
+-- 2. Ordens abertas, da mais antiga para a mais nova (a fila real de trabalho)
+SELECT Name, Equipamento__r.Numero_Serie__c, Status__c, Prioridade__c,
+       SLA_Horas__c, Dentro_SLA__c, Abertura__c
+FROM Ordem_Servico__c
+WHERE Status__c NOT IN ('Concluida', 'Cancelada')
+ORDER BY Abertura__c ASC
+
+-- 3. Ordens que ESTOURARAM o SLA — o relatório que o gestor quer
+SELECT Name, Equipamento__r.Numero_Serie__c, Prioridade__c, SLA_Horas__c, Abertura__c
+FROM Ordem_Servico__c
+WHERE Dentro_SLA__c = false AND Status__c NOT IN ('Concluida', 'Cancelada')
+ORDER BY Abertura__c ASC
+
+-- 4. Agregação: horas gastas por prioridade
+SELECT Prioridade__c, COUNT(Id) qtd, SUM(Horas_Gastas__c) horas, AVG(Horas_Gastas__c) media
+FROM Ordem_Servico__c
+WHERE Status__c = 'Concluida'
+GROUP BY Prioridade__c
+ORDER BY SUM(Horas_Gastas__c) DESC
+
+-- 5. Semi-join: contas que têm algum equipamento parado
+SELECT Id, Name
+FROM Account
+WHERE Id IN (SELECT Conta__c FROM Equipamento__c WHERE Status__c = 'Fora de operacao')
+
+-- 6. Anti-join: equipamentos que NUNCA tiveram ordem de serviço
+SELECT Name, Numero_Serie__c, Status__c
+FROM Equipamento__c
+WHERE Id NOT IN (SELECT Equipamento__c FROM Ordem_Servico__c)
+
+-- 7. Consulta pai→filhos numa única chamada (economiza SOQL do limite)
+SELECT Name, Numero_Serie__c,
+       (SELECT Name, Status__c, Prioridade__c FROM Ordens_de_Servico ORDER BY Abertura__c DESC)
+FROM Equipamento__c
+WHERE OS_Abertas__c > 0
+
+-- 8. Tooling API (rode com a flag -t): cobertura de testes por classe
+SELECT ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered
+FROM ApexCodeCoverageAggregate
+ORDER BY ApexClassOrTrigger.Name

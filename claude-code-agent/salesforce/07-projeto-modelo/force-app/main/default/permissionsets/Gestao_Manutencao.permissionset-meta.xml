@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Gestão de Manutenção</label>
+    <description>Acesso completo ao domínio de manutenção. Atribua a técnicos e gestores. Perfis dão o mínimo; permission sets dão o resto.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+
+    <!-- ============ OBJETOS ============ -->
+    <objectPermissions>
+        <object>Equipamento__c</object>
+        <allowCreate>true</allowCreate>
+        <allowRead>true</allowRead>
+        <allowEdit>true</allowEdit>
+        <allowDelete>false</allowDelete>
+        <viewAllRecords>false</viewAllRecords>
+        <modifyAllRecords>false</modifyAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>Ordem_Servico__c</object>
+        <allowCreate>true</allowCreate>
+        <allowRead>true</allowRead>
+        <allowEdit>true</allowEdit>
+        <allowDelete>false</allowDelete>
+        <viewAllRecords>false</viewAllRecords>
+        <modifyAllRecords>false</modifyAllRecords>
+    </objectPermissions>
+
+    <!-- ============ CAMPOS (FLS) ============
+         A partir da API 67.0 o Apex roda em user mode por padrao: sem FLS aqui,
+         o proprio codigo deixa de enxergar o campo. Campos AutoNumber, fórmula e
+         rollup sao somente leitura por natureza — readable sim, editable nao. -->
+    <fieldPermissions>
+        <field>Equipamento__c.Numero_Serie__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Equipamento__c.Status__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Equipamento__c.Criticidade__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Equipamento__c.Conta__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Equipamento__c.Ultima_Manutencao__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Equipamento__c.OS_Abertas__c</field>
+        <readable>true</readable>
+        <editable>false</editable>
+    </fieldPermissions>
+
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Status__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Prioridade__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Abertura__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Conclusao__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Horas_Gastas__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Descricao__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Tecnico__c</field>
+        <readable>true</readable>
+        <editable>true</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.SLA_Horas__c</field>
+        <readable>true</readable>
+        <editable>false</editable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <field>Ordem_Servico__c.Dentro_SLA__c</field>
+        <readable>true</readable>
+        <editable>false</editable>
+    </fieldPermissions>
+
+    <!-- ============ CLASSES APEX ============
+         Sem isto, o @wire do LWC falha com "Method does not exist" mesmo com a
+         classe publicada: o usuario nao tem permissao de EXECUTAR a classe. -->
+    <classAccesses>
+        <apexClass>OrdemServicoService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>OrdemServicoSelector</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>OrdemServicoTriggerHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+
+    <!-- ============ ABAS ============ -->
+    <tabSettings>
+        <tab>Equipamento__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Ordem_Servico__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

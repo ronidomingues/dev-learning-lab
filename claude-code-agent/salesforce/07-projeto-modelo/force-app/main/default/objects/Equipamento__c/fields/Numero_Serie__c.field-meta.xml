@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Numero_Serie__c</fullName>
+    <label>Número de Série</label>
+    <description>Identificador do fabricante. Chave de integração com sistemas externos.</description>
+    <inlineHelpText>Formato do fabricante, por exemplo SN-000123.</inlineHelpText>
+    <type>Text</type>
+    <length>50</length>
+    <required>true</required>
+    <!-- unique + externalId: permite upsert por esta chave e garante nao-duplicacao
+         no banco (nao no codigo). Ver 06-exemplos.md #13. -->
+    <unique>true</unique>
+    <externalId>true</externalId>
+    <caseSensitive>false</caseSensitive>
+    <trackHistory>false</trackHistory>
+</CustomField>

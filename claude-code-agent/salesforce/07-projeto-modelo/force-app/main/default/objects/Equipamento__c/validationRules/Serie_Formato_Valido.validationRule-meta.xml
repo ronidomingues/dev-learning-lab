@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Serie_Formato_Valido</fullName>
+    <active>true</active>
+    <description>O número de série do fabricante segue o formato SN-999999. Regra com válvula de escape para carga de dados legados.</description>
+    <errorConditionFormula>AND(
+  NOT(ISBLANK(Numero_Serie__c)),
+  NOT(REGEX(Numero_Serie__c, "^SN-[0-9]{6}$")),
+  NOT($Permission.Carga_Dados_Legados)
+)</errorConditionFormula>
+    <errorDisplayField>Numero_Serie__c</errorDisplayField>
+    <errorMessage>Número de série deve seguir o formato SN-000000 (dois dígitos SN, hífen e seis números).</errorMessage>
+</ValidationRule>

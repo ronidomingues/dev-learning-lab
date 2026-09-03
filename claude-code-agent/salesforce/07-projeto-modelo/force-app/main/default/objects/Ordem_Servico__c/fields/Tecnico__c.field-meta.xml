@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tecnico__c</fullName>
+    <label>Técnico</label>
+    <description>Responsável pela execução. Lookup para User — não pode ser master-detail (User é objeto de sistema).</description>
+    <type>Lookup</type>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Ordens_de_Servico</relationshipName>
+    <relationshipLabel>Ordens de Serviço (Técnico)</relationshipLabel>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+</CustomField>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>OS_Abertas__c</fullName>
+    <label>OS Abertas</label>
+    <description>Rollup nativo: só é possível porque Ordem_Servico__c é master-detail deste objeto.</description>
+    <type>Summary</type>
+    <summaryForeignKey>Ordem_Servico__c.Equipamento__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <summaryFilterItems>
+        <field>Ordem_Servico__c.Status__c</field>
+        <operation>notEqual</operation>
+        <value>Concluida,Cancelada</value>
+    </summaryFilterItems>
+    <trackHistory>false</trackHistory>
+</CustomField>

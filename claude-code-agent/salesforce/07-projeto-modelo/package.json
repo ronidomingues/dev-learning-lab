@@ -1,0 +1,22 @@
+{
+  "name": "gestao-manutencao",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Projeto-modelo do curso de Salesforce: gestao de ordens de servico de manutencao.",
+  "scripts": {
+    "deploy": "sf project deploy start --source-dir force-app --wait 20",
+    "test:apex": "sf apex run test --test-level RunLocalTests --result-format human --code-coverage --wait 20",
+    "test:unit": "sfdx-lwc-jest",
+    "lint": "eslint force-app/main/default/lwc",
+    "analyze": "sf code-analyzer run --workspace force-app --view detail",
+    "seed": "sf apex run --file scripts/apex/seed.apex"
+  },
+  "devDependencies": {
+    "@lwc/eslint-plugin-lwc": "^3.0.0",
+    "@salesforce/eslint-config-lwc": "^4.0.0",
+    "@salesforce/sfdx-lwc-jest": "^7.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "prettier-plugin-apex": "^2.2.0"
+  }
+}

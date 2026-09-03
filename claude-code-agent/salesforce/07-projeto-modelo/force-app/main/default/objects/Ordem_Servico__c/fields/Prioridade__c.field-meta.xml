@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prioridade__c</fullName>
+    <label>Prioridade</label>
+    <description>Determina o SLA em horas (ver campo fórmula SLA_Horas__c).</description>
+    <type>Picklist</type>
+    <required>true</required>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Critica</fullName>
+                <default>false</default>
+                <label>Crítica</label>
+            </value>
+            <value>
+                <fullName>Alta</fullName>
+                <default>false</default>
+                <label>Alta</label>
+            </value>
+            <value>
+                <fullName>Normal</fullName>
+                <default>true</default>
+                <label>Normal</label>
+            </value>
+            <value>
+                <fullName>Baixa</fullName>
+                <default>false</default>
+                <label>Baixa</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

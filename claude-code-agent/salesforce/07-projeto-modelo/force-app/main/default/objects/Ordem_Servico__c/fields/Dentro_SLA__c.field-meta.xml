@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Dentro_SLA__c</fullName>
+    <label>Dentro do SLA</label>
+    <description>Se concluída, compara conclusão x abertura. Se aberta, compara agora x abertura — por isso o valor muda sozinho ao longo do dia.</description>
+    <type>Checkbox</type>
+    <formula>IF(
+  ISBLANK(Abertura__c),
+  FALSE,
+  IF(
+    ISBLANK(Conclusao__c),
+    (NOW() - Abertura__c) * 24 &lt;= SLA_Horas__c,
+    (Conclusao__c - Abertura__c) * 24 &lt;= SLA_Horas__c
+  )
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <trackHistory>false</trackHistory>
+</CustomField>

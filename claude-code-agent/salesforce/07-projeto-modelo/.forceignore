@@ -1,0 +1,19 @@
+# Diretórios de trabalho da CLI — contêm tokens. Nunca versione, nunca faça deploy.
+.sf/
+.sfdx/
+.localdevserver/
+
+# Perfis: arquivos gigantes, conflito de merge insolúvel, sobrescrevem permissão alheia.
+# Use PermissionSet. Ver README §5.5.
+**/profiles/**
+
+# Gerados automaticamente pela extensão do VS Code
+**/jsconfig.json
+**/.eslintrc.json
+
+# Configurações que a org gera sozinha e que não fazem parte do projeto
+**/settings/**
+
+# Metadados que costumam vir "sujos" do retrieve e não pertencem a este projeto
+**/appMenus/**
+**/connectedApps/**

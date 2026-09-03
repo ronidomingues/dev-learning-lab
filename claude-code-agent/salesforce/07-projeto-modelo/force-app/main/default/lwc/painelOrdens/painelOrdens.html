@@ -1,0 +1,79 @@
+<template>
+    <lightning-card title={titulo} icon-name="custom:custom18">
+
+        <template lwc:if={carregando}>
+            <lightning-spinner alternative-text="Processando" size="small"></lightning-spinner>
+        </template>
+
+        <div class="slds-var-m-around_small">
+
+            <template lwc:if={temErro}>
+                <div class="slds-text-color_error slds-var-p-around_small" role="alert">
+                    {mensagemErro}
+                </div>
+            </template>
+
+            <template lwc:if={vazio}>
+                <p class="slds-text-color_weak slds-var-p-around_small">
+                    Nenhuma ordem de serviço para este equipamento.
+                </p>
+            </template>
+
+            <template lwc:if={linhas.length}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={linhas}
+                    columns={colunas}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column
+                    column-widths-mode="auto">
+                </lightning-datatable>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Modal de conclusão -->
+    <template lwc:if={mostrarModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 aria-labelledby="titulo-modal" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close"
+                            title="Fechar" onclick={fecharModal}>
+                        <lightning-icon icon-name="utility:close" size="small"
+                                        variant="inverse"></lightning-icon>
+                    </button>
+                    <h2 id="titulo-modal" class="slds-modal__title">
+                        Concluir {ordemSelecionada.Name}
+                    </h2>
+                </header>
+
+                <div class="slds-modal__content slds-var-p-around_medium">
+                    <lightning-input
+                        type="number"
+                        label="Horas gastas"
+                        value={horas}
+                        onchange={handleHoras}
+                        step="0.5" min="0.5" max="24"
+                        required
+                        message-when-range-overflow="Máximo de 24 horas por OS"
+                        message-when-range-underflow="Mínimo de 0,5 hora">
+                    </lightning-input>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancelar" onclick={fecharModal}
+                                      disabled={carregando}>
+                    </lightning-button>
+                    <lightning-button variant="brand" label="Concluir"
+                                      class="slds-var-m-left_x-small"
+                                      onclick={confirmarConclusao}
+                                      disabled={carregando}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

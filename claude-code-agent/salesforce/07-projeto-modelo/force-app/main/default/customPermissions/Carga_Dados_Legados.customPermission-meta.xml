@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <isLicensed>false</isLicensed>
+    <label>Carga de Dados Legados</label>
+    <description>Dispensa a validação de formato do número de série. Existe porque migração de dados legados sempre encontra registros que não seguem o padrão — e sem esta válvula alguém desativaria a regra em produção.</description>
+</CustomPermission>

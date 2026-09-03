@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Equipamento__c</fullName>
+    <label>Equipamento</label>
+    <description>Master-detail: habilita o rollup OS_Abertas__c e herda a segurança do pai.</description>
+    <type>MasterDetail</type>
+    <referenceTo>Equipamento__c</referenceTo>
+    <relationshipName>Ordens_de_Servico</relationshipName>
+    <relationshipLabel>Ordens de Serviço</relationshipLabel>
+    <relationshipOrder>0</relationshipOrder>
+    <!-- Reparentear permitido: uma OS aberta no equipamento errado pode ser corrigida
+         sem apagar e recriar. Sem isto, o campo e' imutavel apos o insert. -->
+    <reparentableMasterDetail>true</reparentableMasterDetail>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    <trackHistory>false</trackHistory>
+</CustomField>

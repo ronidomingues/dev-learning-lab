@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SLA_Horas__c</fullName>
+    <label>SLA (horas)</label>
+    <description>Prazo de atendimento derivado da prioridade. Fórmula: muda sem deploy de código, mas exige deploy de metadado. Ver exercício 3 do README.</description>
+    <type>Number</type>
+    <precision>4</precision>
+    <scale>0</scale>
+    <formula>CASE(TEXT(Prioridade__c),
+  "Critica", 4,
+  "Alta",    8,
+  "Normal",  24,
+  "Baixa",   72,
+  24)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <trackHistory>false</trackHistory>
+</CustomField>

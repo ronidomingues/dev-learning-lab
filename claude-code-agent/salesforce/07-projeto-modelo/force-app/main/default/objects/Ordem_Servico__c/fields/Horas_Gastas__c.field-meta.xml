@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Horas_Gastas__c</fullName>
+    <label>Horas Gastas</label>
+    <description>Horas de mão de obra. Obrigatório ao concluir (ver validation rule).</description>
+    <type>Number</type>
+    <precision>5</precision>
+    <scale>2</scale>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+</CustomField>

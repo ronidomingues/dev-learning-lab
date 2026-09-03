@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <!-- isExposed=false (o padrao do gerador) esconde o componente do App Builder.
+         E' o motivo numero 1 de "fiz deploy e nao aparece". -->
+    <isExposed>true</isExposed>
+    <masterLabel>Painel de Ordens de Serviço</masterLabel>
+    <description>Lista e conclui as ordens de serviço de um equipamento.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <!-- Propriedade configuravel pelo admin no App Builder, sem deploy. -->
+            <property name="apenasAbertas"
+                      type="Boolean"
+                      label="Mostrar apenas ordens abertas"
+                      default="false"/>
+            <!-- Restringe o componente ao objeto certo: evita que alguem o arraste
+                 para a pagina de Account e receba um erro incompreensivel. -->
+            <objects>
+                <object>Equipamento__c</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

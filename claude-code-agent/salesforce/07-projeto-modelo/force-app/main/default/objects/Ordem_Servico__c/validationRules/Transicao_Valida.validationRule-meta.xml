@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Transicao_Valida</fullName>
+    <active>true</active>
+    <description>Máquina de estados: Concluída e Cancelada são terminais. Só quem tem a permissão customizada Reabrir_OS pode voltar atrás.</description>
+    <errorConditionFormula>AND(
+  NOT(ISNEW()),
+  OR(
+    ISPICKVAL(PRIORVALUE(Status__c), "Concluida"),
+    ISPICKVAL(PRIORVALUE(Status__c), "Cancelada")
+  ),
+  OR(
+    ISPICKVAL(Status__c, "Aberta"),
+    ISPICKVAL(Status__c, "Em andamento")
+  ),
+  NOT($Permission.Reabrir_OS)
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>Ordem de serviço concluída ou cancelada não pode ser reaberta. Solicite a permissão "Reabrir OS" se for necessário.</errorMessage>
+</ValidationRule>

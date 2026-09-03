@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Ordem de Serviço</label>
+    <pluralLabel>Ordens de Serviço</pluralLabel>
+    <description>Chamado de manutenção sobre um equipamento.</description>
+    <nameField>
+        <label>Número da OS</label>
+        <type>AutoNumber</type>
+        <displayFormat>OS-{00000}</displayFormat>
+        <trackHistory>false</trackHistory>
+    </nameField>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <!-- ControlledByParent e' OBRIGATORIO em objeto com master-detail:
+         a seguranca do filho e' herdada do pai, nao definida aqui. -->
+    <sharingModel>ControlledByParent</sharingModel>
+    <enableActivities>true</enableActivities>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableFeeds>false</enableFeeds>
+    <enableBulkApi>true</enableBulkApi>
+    <enableStreamingApi>true</enableStreamingApi>
+    <visibility>Public</visibility>
+</CustomObject>
