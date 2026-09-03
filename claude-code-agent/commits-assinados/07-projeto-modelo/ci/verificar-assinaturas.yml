@@ -1,0 +1,70 @@
+# .github/workflows/verificar-assinaturas.yml
+#
+# Reprova o PR se algum commit novo vier sem assinatura.
+#
+# O detalhe que derruba a maioria das tentativas está em `fetch-depth: 0`.
+# Por padrão, actions/checkout faz um clone RASO (fetch-depth: 1): você recebe
+# um commit só, e `git log origin/main..HEAD` não tem o que percorrer. O teste
+# passa sempre, e ninguém percebe que ele nunca testou nada.
+#
+name: verificar assinaturas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  assinaturas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0          # histórico completo — sem isto o teste é decorativo
+
+      - name: Determinar o intervalo a auditar
+        id: intervalo
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "range=${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "range=${{ github.event.before }}..${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Auditar as assinaturas dos commits novos
+        env:
+          # Na CI não há allowed_signers, então [U] (assinatura boa, dono
+          # desconhecido) é o melhor que se consegue localmente. A verificação
+          # de IDENTIDADE fica com o ruleset do GitHub, no push — veja
+          # 18-politica-de-equipe.md. Este teste pega o caso [N]: sem assinatura.
+          ACEITAR_U: "1"
+          IGNORAR_MERGE: "1"
+        run: |
+          chmod +x .github/scripts/auditar-historico.sh
+          .github/scripts/auditar-historico.sh . "${{ steps.intervalo.outputs.range }}"
+
+  # ── Alternativa sem script próprio ────────────────────────────────────────
+  # A API do GitHub já devolve o veredito DELE, que é o que vale de verdade,
+  # porque leva em conta a chave cadastrada e o e-mail verificado da conta.
+  veredito-do-github:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Exigir "verified" em todos os commits do PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/commits" \
+             --paginate \
+             --jq '.[] | [.sha[0:9], .commit.verification.verified, .commit.verification.reason] | @tsv' \
+          | tee resultado.tsv
+          if grep -qP '\tfalse\t' resultado.tsv; then
+            echo "::error::há commits não verificados neste PR"
+            exit 1
+          fi

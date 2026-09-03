@@ -1,0 +1,44 @@
+# allowed_signers — quem pode assinar o quê, na verificação LOCAL do Git.
+#
+# Onde este arquivo é lido:
+#   git config --global gpg.ssh.allowedSignersFile ~/.config/git/allowed_signers
+#
+# Formato de cada linha:
+#   <principal> [opções] <tipo-da-chave> <chave-em-base64> [comentário]
+#
+# O "principal" é só um rótulo. Costuma-se usar o e-mail, mas o Git NÃO confere
+# se ele bate com o autor do commit — ele apenas o exibe em %GS. Veja o ato 9 do
+# sandbox.sh, e 60-teoria-avancada.md.
+#
+# ATENÇÃO: as chaves abaixo são exemplos inventados e NÃO funcionam.
+# Substitua pelo conteúdo dos .pub reais.
+
+# ── caso 1: uma pessoa, uma chave ───────────────────────────────────────────
+# namespaces="git" limita esta chave a assinar objetos do Git. Sem essa opção,
+# a mesma chave valeria para qualquer namespace (arquivo, e-mail, o que for) —
+# e uma assinatura feita para outro fim poderia ser reaproveitada aqui.
+ana@exemplo.dev namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ana@notebook
+
+# ── caso 2: a mesma pessoa com duas máquinas ────────────────────────────────
+# Uma linha por chave. É o normal: notebook e desktop têm chaves diferentes, e
+# chave privada não deve viajar entre máquinas.
+bruno@exemplo.dev namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB bruno@notebook
+bruno@exemplo.dev namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC bruno@desktop
+
+# ── caso 3: chave aposentada, sem invalidar o passado ───────────────────────
+# Quando alguém troca de chave, a tentação é apagar a linha antiga. Não faça:
+# isso transforma em [U] todo commit histórico assinado por ela. Use valid-before
+# com a data em que a chave saiu de uso — o que veio antes continua [G].
+carla@exemplo.dev namespaces="git",valid-before="20260301" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLODDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD carla@chave-antiga
+carla@exemplo.dev namespaces="git",valid-after="20260301"  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE carla@chave-nova
+
+# ── caso 4: robô de CI ──────────────────────────────────────────────────────
+# Bots merecem principal próprio, para dar para separar na auditoria o que foi
+# gente e o que foi máquina.
+bot@exemplo.dev namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF robo-de-release
+
+# ── caso 5: autoridade certificadora SSH (empresas grandes) ─────────────────
+# Em vez de listar 500 chaves, você lista UMA autoridade, e ela emite
+# certificados de curta duração para cada pessoa. É a única forma de isto
+# escalar sem virar um arquivo que ninguém mantém. Veja 14-ssh-signing-a-fundo.md.
+#*@exemplo.dev cert-authority,namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXEMPLOGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG ca-da-empresa

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#
+# pre-commit — impede que você commite sem assinar, por esquecimento.
+#
+# Instale com:
+#   install -m 755 hooks/pre-commit .git/hooks/pre-commit
+#
+# Limite honesto: é conveniência, não segurança. `git commit --no-verify` passa
+# por cima, e o hook mora em .git/, que não é versionado nem distribuído.
+# Trava de verdade só existe do lado do servidor (ruleset do GitHub).
+#
+set -euo pipefail
+
+# 1. a assinatura automática está ligada neste repositório?
+if [ "$(git config --get commit.gpgsign || echo false)" != "true" ]; then
+  cat >&2 <<'MSG'
+recusado: commit.gpgsign não está ligado neste repositório.
+
+  Ligue com:   git config commit.gpgsign true
+  Ou, só desta vez, pule este hook:   git commit --no-verify
+MSG
+  exit 1
+fi
+
+# 2. existe uma chave de assinatura configurada?
+if [ -z "$(git config --get user.signingkey || true)" ]; then
+  echo "recusado: user.signingkey está vazio. Veja 04-como-comecar.md." >&2
+  exit 1
+fi
+
+# 3. no modo SSH, a chave privada correspondente existe mesmo?
+if [ "$(git config --get gpg.format || echo openpgp)" = "ssh" ]; then
+  pub="$(git config --get user.signingkey)"
+  case "$pub" in
+    key::*) : ;;  # chave literal dentro do config: nada a conferir aqui
+    *)
+      priv="${pub%.pub}"
+      if [ ! -f "$pub" ]; then
+        echo "recusado: chave pública não encontrada em '$pub'." >&2
+        exit 1
+      fi
+      # Com agente (1Password, ssh-agent, YubiKey) a privada pode não estar em disco;
+      # por isso isto é aviso, não erro.
+      if [ ! -f "$priv" ] && ! ssh-add -L >/dev/null 2>&1; then
+        echo "aviso: '$priv' não existe e não há agente SSH ativo; a assinatura pode falhar." >&2
+      fi
+      ;;
+  esac
+fi
+
+exit 0
