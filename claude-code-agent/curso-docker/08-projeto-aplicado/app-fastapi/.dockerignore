@@ -1,0 +1,30 @@
+# O .dockerignore define o que NÃO vai para o build context.
+# Sem ele, o `docker build` envia .git, venv e caches para o daemon:
+# build lento, cache invalidado à toa e risco de vazar segredo na imagem.
+
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# NUNCA deixe segredo entrar na imagem por COPY acidental.
+.env
+.env.*
+!.env.example
+
+# Dados locais e artefatos
+data/
+*.db
+*.sqlite3
+*.log
+
+# Documentação e infra não precisam estar na imagem da aplicação
+README.md
+compose*.yaml
+Dockerfile
+.dockerignore

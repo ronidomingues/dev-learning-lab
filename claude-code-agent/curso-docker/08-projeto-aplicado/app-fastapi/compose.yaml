@@ -1,0 +1,59 @@
+# Compose de DESENVOLVIMENTO.
+# Nome do arquivo: `compose.yaml` é o nome oficial desde o Compose v2.
+# `docker-compose.yml` ainda funciona, mas é o nome legado.
+#
+# Note que NÃO existe mais a chave `version:` no topo — ela foi
+# descontinuada e o Compose v2 emite aviso se você a mantiver.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime          # qual estágio do multi-stage buildar
+    image: catalogo-api:dev
+    ports:
+      - "8000:8000"            # host:container
+    environment:
+      APP_ENV: development
+      APP_VERSION: dev
+      DATABASE_URL: postgresql+asyncpg://appuser:senha-de-desenvolvimento@db:5432/appdb
+    depends_on:
+      db:
+        # A diferença que salva horas de depuração: sem `condition`,
+        # o depends_on só espera o container INICIAR, não ficar pronto.
+        # A API subiria antes do Postgres aceitar conexão e morreria.
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: senha-de-desenvolvimento
+      POSTGRES_DB: appdb
+    volumes:
+      # Volume nomeado: os dados sobrevivem a `docker compose down`.
+      # (só somem com `docker compose down -v` — cuidado com esse -v)
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready pergunta ao Postgres se ele aceita conexão.
+      # O -U precisa bater com POSTGRES_USER, senão o check falha sempre.
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+    # Sem `ports:` de propósito: o banco só precisa ser alcançável pela
+    # rede interna do compose, não pelo host. Expor 5432 no host é um dos
+    # erros de segurança mais comuns em homelab.
+
+volumes:
+  pgdata:

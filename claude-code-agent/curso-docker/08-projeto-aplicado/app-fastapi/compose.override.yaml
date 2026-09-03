@@ -1,0 +1,17 @@
+# O Compose lê `compose.yaml` + `compose.override.yaml` AUTOMATICAMENTE
+# e mescla os dois. Este arquivo é o lugar certo para o que é só seu:
+# hot-reload, portas extras, montagem do código-fonte.
+#
+# Em produção você roda explicitamente sem ele:
+#   docker compose -f compose.yaml up -d
+
+services:
+  api:
+    # Bind mount do código: editar no host reflete no container na hora.
+    # Só faz sentido em DEV; em produção o código vem de dentro da imagem.
+    volumes:
+      - ./app:/app/app:ro      # :ro = read-only, o container não escreve no seu código
+    # --reload observa os arquivos e reinicia o uvicorn a cada save.
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      APP_ENV: development

@@ -1,0 +1,15 @@
+# Versões consultadas no PyPI em 18/08/2026 e fixadas de propósito.
+# Pino exato (==) é o que torna o build reprodutível: sem isso, o mesmo
+# Dockerfile gera imagens diferentes em dias diferentes.
+fastapi==0.141.1
+uvicorn[standard]==0.52.3
+sqlalchemy==2.0.52
+pydantic-settings==2.15.0
+
+# Drivers de banco. aiosqlite é o padrão do exemplo (zero infra).
+aiosqlite==0.22.1
+asyncpg==0.31.0
+
+# greenlet é dependência REAL do SQLAlchemy async, não opcional.
+# Esquecer dela gera o erro clássico: "MissingGreenlet".
+greenlet==3.5.5

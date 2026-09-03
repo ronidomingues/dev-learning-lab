@@ -1,0 +1,112 @@
+# Sistema financeiro estudantil — app web/mobile de controle financeiro
+#
+# Diferença de postura em relação ao FlixARD: aqui há DADO FINANCEIRO
+# PESSOAL. Isso muda três coisas de forma não-negociável:
+#   1. segredo nunca fica em `environment:` — vai por Docker secret;
+#   2. backup é parte da arquitetura, não tarefa manual;
+#   3. a API roda com filesystem read-only e sem privilégio nenhum.
+
+services:
+
+  api:
+    build:
+      context: ../app-fastapi
+      target: runtime
+    image: financeiro-api:1.0.0
+    environment:
+      APP_ENV: production
+      APP_VERSION: 1.0.0
+      # Note: a senha NÃO está aqui. Só o caminho do arquivo do secret.
+      # A aplicação lê o conteúdo de /run/secrets/db_password.
+      # Por que isso importa: tudo em `environment:` aparece em
+      # `docker inspect`, nos logs do orquestrador e no `/proc/1/environ`
+      # de qualquer processo do container.
+      DATABASE_URL_FILE: /run/secrets/database_url
+    secrets:
+      - database_url
+    networks:
+      - interna
+      - borda
+    ports:
+      - "127.0.0.1:8000:8000"   # <- só o loopback do host, não a LAN inteira
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+    # ----- endurecimento (hardening) -----
+    read_only: true               # filesystem raiz imutável
+    tmpfs:
+      - /tmp:size=64m             # o que precisa escrever, escreve em RAM
+    security_opt:
+      - no-new-privileges:true    # impede escalar via binário setuid
+    cap_drop:
+      - ALL                       # remove TODAS as capabilities do kernel
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512m
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: financeiro
+      POSTGRES_DB: financeiro
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backup:/backup
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financeiro -d financeiro"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # Backup automático: um container que acorda, faz dump e dorme.
+  # Backup que depende de você lembrar não é backup.
+  backup:
+    image: postgres:17-alpine
+    environment:
+      PGPASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - ./backup:/backup
+      - ./scripts/backup.sh:/backup.sh:ro
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - interna
+    restart: unless-stopped
+
+networks:
+  borda:
+  interna:
+    internal: true
+
+volumes:
+  pgdata:
+
+# Em Compose "standalone" (sem Swarm), secrets são montados como arquivo
+# em /run/secrets/<nome> a partir de um arquivo do host. É bem melhor que
+# variável de ambiente: não vaza em `docker inspect` nem em log.
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  database_url:
+    file: ./secrets/database_url.txt

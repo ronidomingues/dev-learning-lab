@@ -1,0 +1,143 @@
+# FlixARD — plataforma de streaming em servidor local (homelab)
+#
+# Desenho da topologia:
+#   internet/LAN -> caddy (única porta exposta) -> api  -> db
+#                                              -> web
+#                                    api -> redis (cache/sessão)
+#
+# Princípio que guia tudo aqui: UM ponto de entrada. Só o proxy publica
+# porta no host. Banco, cache e API só existem na rede interna.
+
+services:
+
+  # ---------------------------------------------------------------
+  # Proxy reverso: o único serviço com porta publicada
+  # ---------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data          # certificados TLS — NÃO pode ser efêmero
+      - caddy_config:/config
+    depends_on:
+      - api
+      - web
+    networks:
+      - borda
+      - interna
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------
+  # API de catálogo e streaming
+  # ---------------------------------------------------------------
+  api:
+    build:
+      context: ../app-fastapi
+      target: runtime
+    image: flixard-api:1.0.0
+    environment:
+      APP_ENV: production
+      APP_VERSION: 1.0.0
+      DATABASE_URL: postgresql+asyncpg://flixard:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@db:5432/flixard
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      # BIND MOUNT, não volume nomeado: a biblioteca de mídia é um
+      # diretório real do servidor, que você gerencia por fora (rsync,
+      # Samba, download). Volume nomeado esconderia os arquivos dentro
+      # do /var/lib/docker e tornaria isso impraticável.
+      # :ro porque a API só lê. Se ela for comprometida, não apaga sua
+      # coleção — e essa única letra é a diferença.
+      - /srv/flixard/midia:/midia:ro
+      # Thumbnails e artefatos gerados: aí sim volume nomeado.
+      - thumbs:/app/thumbs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    # Limites de recurso: em homelab, o servidor faz mais coisas.
+    # Sem limite, um transcode desgovernado derruba a máquina inteira.
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+
+  # ---------------------------------------------------------------
+  # Front-end
+  # ---------------------------------------------------------------
+  web:
+    image: nginx:1.29-alpine
+    volumes:
+      - ./web-dist:/usr/share/nginx/html:ro
+    networks:
+      - interna
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------
+  # Banco
+  # ---------------------------------------------------------------
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: flixard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: flixard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Backup: bind mount para você conseguir levar o dump embora.
+      - /srv/flixard/backup:/backup
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flixard -d flixard"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------
+  # Cache
+  # ---------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    # --save "" desliga a persistência: é cache, pode perder.
+    # Sem isso o Redis grava dump.rdb e passa a exigir disco e cuidado.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+# -------------------------------------------------------------------
+# Duas redes: quem fala com o mundo e quem não fala.
+# O db e o redis NÃO estão em `borda` — então, mesmo que o Caddy seja
+# comprometido, não há rota direta até o banco.
+# -------------------------------------------------------------------
+networks:
+  borda:
+  interna:
+    internal: true   # sem rota para fora: nem saída para a internet
+
+volumes:
+  pgdata:
+  thumbs:
+  caddy_data:
+  caddy_config:

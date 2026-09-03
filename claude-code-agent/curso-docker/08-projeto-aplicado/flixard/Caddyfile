@@ -1,0 +1,13 @@
+# Caddy resolve TLS sozinho. Em rede local sem domínio público, use
+# o modo interno (CA local) — troque para o seu domínio se tiver um.
+flixard.local {
+    tls internal
+
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    handle {
+        reverse_proxy web:80
+    }
+}
