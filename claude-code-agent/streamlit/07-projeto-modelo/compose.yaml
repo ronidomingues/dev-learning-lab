@@ -1,0 +1,16 @@
+services:
+  painel:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      PAINEL_AMBIENTE: prod
+      PAINEL_BANCO: /dados/painel.db
+    volumes:
+      # O banco precisa sobreviver ao contêiner. Sem este volume, cada deploy
+      # apaga tudo — o erro mais comum de quem coloca SQLite em Docker.
+      - painel-dados:/dados
+    restart: unless-stopped
+
+volumes:
+  painel-dados:

@@ -1,0 +1,7 @@
+# Versões fixadas e testadas em 02/09/2026 (Python 3.10.12, Ubuntu 22.04.5).
+# `==` e não `>=`: painel que "funcionava semana passada" quase sempre é
+# dependência que subiu sozinha. Para atualizar, mude aqui e rode os testes.
+streamlit==1.63.0
+pandas==2.3.3
+plotly==7.0.0
+pytest==9.0.2

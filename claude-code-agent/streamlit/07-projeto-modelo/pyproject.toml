@@ -1,0 +1,18 @@
+[project]
+name = "painel-comercial"
+version = "1.0.0"
+description = "Projeto-modelo do curso de Streamlit: painel + CRUD com backend separado."
+requires-python = ">=3.10"
+dependencies = [
+    "streamlit==1.63.0",
+    "pandas==2.3.3",
+    "plotly==7.0.0",
+]
+
+[dependency-groups]
+dev = ["pytest==9.0.2"]
+
+[tool.pytest.ini_options]
+testpaths = ["testes"]
+pythonpath = ["."]
+addopts = "-q"

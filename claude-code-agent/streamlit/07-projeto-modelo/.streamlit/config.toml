@@ -1,0 +1,55 @@
+# Configuração do projeto. Fica versionada no Git: é comportamento da app,
+# não segredo. Segredo vai em .streamlit/secrets.toml, que NÃO se versiona.
+
+[theme]
+# ---- Identidade visual -----------------------------------------------------
+# base define o ponto de partida; tudo abaixo sobrescreve.
+base = "light"
+primaryColor = "#2563eb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f6f7f9"
+textColor = "#111827"
+linkColor = "#1d4ed8"
+
+# Paleta dos gráficos, definida NO TEMA (Streamlit >= 1.54). Assim os gráficos
+# nativos (st.line_chart, st.bar_chart) e qualquer figura com theme="streamlit"
+# usam as mesmas cores, sem repetir a lista em cada arquivo.
+chartCategoricalColors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100",
+                          "#e87ba4", "#008300", "#4a3aa7", "#e34948"]
+chartSequentialColors = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5",
+                         "#256abf", "#184f95", "#0d366b"]
+
+# Barra lateral com fundo próprio: separa "controles" de "conteúdo".
+# É o truque mais barato para um painel parecer produto e não protótipo.
+[theme.sidebar]
+backgroundColor = "#0f172a"
+secondaryBackgroundColor = "#1e293b"
+textColor = "#e2e8f0"
+primaryColor = "#60a5fa"
+linkColor = "#93c5fd"
+
+[theme.dark]
+backgroundColor = "#0b1120"
+secondaryBackgroundColor = "#111a2e"
+textColor = "#e5e7eb"
+primaryColor = "#60a5fa"
+# A versão escura NÃO é a clara invertida: são os mesmos oito matizes,
+# reescalonados para o fundo escuro e validados contra ele.
+chartCategoricalColors = ["#3987e5", "#d95926", "#199e70", "#c98500",
+                          "#d55181", "#008300", "#9085e9", "#e66767"]
+
+[server]
+# Sem coleta de uso e sem o balão de e-mail na primeira execução.
+headless = true
+# Proteção contra CSRF ligada (padrão) — não desligue para "resolver" upload.
+enableXsrfProtection = true
+maxUploadSize = 20
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# Em produção troque para "stacktrace" -> "none": rastreamento de pilha na tela
+# do usuário conta a estrutura do seu código para quem não deveria vê-la.
+showErrorDetails = "full"
+toolbarMode = "minimal"
