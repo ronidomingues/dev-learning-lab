@@ -1,0 +1,6 @@
+planta.db
+planta.db-wal
+planta.db-shm
+*.csv
+*.parquet
+__pycache__/
