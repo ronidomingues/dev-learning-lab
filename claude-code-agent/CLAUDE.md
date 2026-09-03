@@ -1,4 +1,4 @@
-# learn-process — Preset de Aprendizado Profundo
+# Preset de Aprendizado Profundo
 
 Esta pasta é um **repositório pessoal de aprendizado**. Não é um projeto de software.
 Toda pergunta feita aqui é um **pedido de material didático completo** sobre um assunto.
