@@ -1,0 +1,51 @@
+id	cefr	tag	en	pt	ipa	cloze
+001	A1	apresentacao	I'm from Brazil, but I live in Portugal now.	Sou do Brasil, mas moro em Portugal agora.	/aɪm frəm brəˈzɪl/	from
+002	A1	apresentacao	She's a nurse and she works at a hospital.	Ela é enfermeira e trabalha num hospital.	/ʃiz ə nɜːrs/	a nurse
+003	A1	apresentacao	Nice to meet you. How are you doing?	Prazer em conhecer você. Como você está?	/naɪs tə ˈmiːt juː/	Nice to meet you
+004	A1	rotina	I usually wake up at six thirty.	Eu normalmente acordo às seis e meia.	/ˈjuːʒuəli/	usually
+005	A1	rotina	He doesn't drink coffee in the evening.	Ele não toma café à noite.	/ˈdʌzənt/	doesn't
+006	A1	pedido	Could I have a glass of water, please?	Eu poderia tomar um copo de água, por favor?	/kʊd aɪ hæv/	Could I have
+007	A1	pedido	How much does it cost?	Quanto custa?	/haʊ mʌtʃ dəz ɪt kɒst/	does it cost
+008	A1	viagem	Where is the nearest bus stop?	Onde fica o ponto de ônibus mais próximo?	/ˈnɪərɪst/	nearest
+009	A1	rotina	There are three people waiting outside.	Tem três pessoas esperando lá fora.	/ðeər ɑːr/	There are
+010	A1	apresentacao	I have two brothers and one sister.	Eu tenho dois irmãos e uma irmã.	/aɪ hæv/	have
+011	A2	passado	Last weekend I went to the beach with my family.	No último fim de semana eu fui à praia com minha família.	/went/	went
+012	A2	passado	She bought a new laptop because the old one broke.	Ela comprou um notebook novo porque o antigo quebrou.	/bɔːt/	bought
+013	A2	passado	We didn't see him at the party.	Nós não o vimos na festa.	/ˈdɪdənt siː/	didn't see
+014	A2	rotina	I'm going to call her tomorrow morning.	Eu vou ligar para ela amanhã de manhã.	/ˈɡəʊɪŋ tə/	going to
+015	A2	opiniao	I think this is a better idea than the other one.	Eu acho que essa é uma ideia melhor que a outra.	/ˈbetər ðən/	better idea than
+016	A2	pedido	Would you mind closing the window?	Você se importaria de fechar a janela?	/wʊd juː maɪnd/	Would you mind
+017	A2	rotina	I've lived here for five years.	Eu moro aqui há cinco anos.	/aɪv lɪvd/	for
+018	A2	rotina	How long have you been studying English?	Há quanto tempo você estuda inglês?	/haʊ lɒŋ/	have you been
+019	A2	viagem	The flight was delayed by two hours.	O voo atrasou duas horas.	/dɪˈleɪd/	was delayed
+020	A2	opiniao	It's not as expensive as I expected.	Não é tão caro quanto eu esperava.	/əz ɪkˈspensɪv əz/	as expensive as
+021	B1	reuniao	Sorry, could you say that again? I didn't catch the last part.	Desculpe, você pode repetir? Não peguei a última parte.	/kætʃ/	didn't catch
+022	B1	reuniao	Can I jump in here for a second?	Posso entrar aqui um segundo?	/dʒʌmp ɪn/	jump in
+023	B1	reuniao	Let me check and get back to you today.	Deixa eu verificar e te retorno hoje.	/ɡet bæk tə juː/	get back to you
+024	B1	reuniao	Just to make sure we're on the same page.	Só para garantir que estamos alinhados.	/ɒn ðə seɪm peɪdʒ/	on the same page
+025	B1	email	I'm writing about the report we discussed last week.	Estou escrevendo sobre o relatório que discutimos na semana passada.	/ˈraɪtɪŋ əˈbaʊt/	writing about
+026	B1	email	Could you let me know by Friday?	Você poderia me avisar até sexta?	/let miː nəʊ/	let me know
+027	B1	email	Apologies for the short notice.	Desculpe pelo pouco tempo de aviso.	/əˈpɒlədʒiz/	Apologies for
+028	B1	tecnologia	The app crashes every time I try to upload a large file.	O aplicativo trava toda vez que eu tento subir um arquivo grande.	/ˈkræʃɪz/	crashes
+029	B1	tecnologia	I've tried restarting it, but the problem is still there.	Eu tentei reiniciar, mas o problema continua.	/aɪv traɪd/	tried restarting
+030	B1	tecnologia	It seems to be related to the file size.	Parece estar relacionado ao tamanho do arquivo.	/rɪˈleɪtɪd tuː/	related to
+031	B1	opiniao	I see where you're coming from, but I'm not sure I agree.	Entendo o seu ponto, mas não sei se concordo.	/kʌmɪŋ frəm/	where you're coming from
+032	B1	opiniao	What if we tried a different approach?	E se a gente tentasse uma abordagem diferente?	/wɒt ɪf wiː traɪd/	What if we tried
+033	B1	passado	By the time we arrived, the meeting had already started.	Quando chegamos, a reunião já tinha começado.	/həd ɔːlˈredi/	had already started
+034	B1	conectivos	Although it was raining, we decided to go out.	Embora estivesse chovendo, decidimos sair.	/ɔːlˈðəʊ/	Although
+035	B1	conectivos	He was tired; nevertheless, he finished the work.	Ele estava cansado; ainda assim, terminou o trabalho.	/ˌnevəðəˈles/	nevertheless
+036	B1	viagem	Something came up and I need to reschedule.	Surgiu um imprevisto e preciso remarcar.	/keɪm ʌp/	came up
+037	B2	reuniao	Off the top of my head, I'd say around thirty percent.	Assim de cabeça, eu diria uns trinta por cento.	/ɒf ðə tɒp/	Off the top of my head
+038	B2	reuniao	I don't have that number in front of me right now.	Não tenho esse número aqui comigo agora.	/ɪn frʌnt əv miː/	in front of me
+039	B2	email	My recommendation is to go with the first option.	Minha recomendação é seguir com a primeira opção.	/ˌrekəmenˈdeɪʃən/	recommendation
+040	B2	email	Happy to jump on a quick call if that's easier.	Fico à disposição para uma call rápida, se for mais fácil.	/hæpi tə/	Happy to
+041	B2	opiniao	My only concern is that we'd lose three weeks.	Minha única preocupação é que perderíamos três semanas.	/kənˈsɜːn/	concern
+042	B2	opiniao	That said, I think the trade-off is worth it.	Dito isso, acho que a troca compensa.	/ðæt sed/	That said
+043	B2	narrativa	Turns out he had been working there the whole time.	Acontece que ele estava trabalhando lá esse tempo todo.	/tɜːnz aʊt/	Turns out
+044	B2	narrativa	It ended up being the best part of the trip.	Acabou sendo a melhor parte da viagem.	/ˈendɪd ʌp/	ended up being
+045	B2	tecnologia	Rather than rewriting it, we refactored the worst file first.	Em vez de reescrever, refatoramos primeiro o pior arquivo.	/ˈrɑːðə ðən/	Rather than
+046	B2	tecnologia	This would have been caught by a test.	Isso teria sido pego por um teste.	/wʊd həv biːn/	would have been caught
+047	B2	conectivos	Whereas the first approach is faster, the second is safer.	Enquanto a primeira abordagem é mais rápida, a segunda é mais segura.	/weərˈæz/	Whereas
+048	B2	conectivos	Provided that we get approval, we can start on Monday.	Desde que consigamos aprovação, podemos começar na segunda.	/prəˈvaɪdɪd/	Provided that
+049	B2	entrevista	What I took from it is that data changes the conversation.	O que eu tirei disso é que dados mudam a conversa.	/tʊk frəm ɪt/	What I took from it
+050	B2	entrevista	Rather than pushing back, I offered a middle ground.	Em vez de resistir, ofereci um meio-termo.	/ˈmɪdəl ɡraʊnd/	middle ground

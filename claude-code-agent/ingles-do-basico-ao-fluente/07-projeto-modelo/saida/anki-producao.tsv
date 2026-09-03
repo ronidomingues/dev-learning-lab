@@ -1,0 +1,50 @@
+I'm {{c1::from}} Brazil, but I live in Portugal now.	Sou do Brasil, mas moro em Portugal agora.	ponte a1 apresentacao producao
+She's {{c1::a nurse}} and she works at a hospital.	Ela é enfermeira e trabalha num hospital.	ponte a1 apresentacao producao
+{{c1::Nice to meet you}}. How are you doing?	Prazer em conhecer você. Como você está?	ponte a1 apresentacao producao
+I {{c1::usually}} wake up at six thirty.	Eu normalmente acordo às seis e meia.	ponte a1 rotina producao
+He {{c1::doesn't}} drink coffee in the evening.	Ele não toma café à noite.	ponte a1 rotina producao
+{{c1::Could I have}} a glass of water, please?	Eu poderia tomar um copo de água, por favor?	ponte a1 pedido producao
+How much {{c1::does it cost}}?	Quanto custa?	ponte a1 pedido producao
+Where is the {{c1::nearest}} bus stop?	Onde fica o ponto de ônibus mais próximo?	ponte a1 viagem producao
+{{c1::There are}} three people waiting outside.	Tem três pessoas esperando lá fora.	ponte a1 rotina producao
+I {{c1::have}} two brothers and one sister.	Eu tenho dois irmãos e uma irmã.	ponte a1 apresentacao producao
+Last weekend I {{c1::went}} to the beach with my family.	No último fim de semana eu fui à praia com minha família.	ponte a2 passado producao
+She {{c1::bought}} a new laptop because the old one broke.	Ela comprou um notebook novo porque o antigo quebrou.	ponte a2 passado producao
+We {{c1::didn't see}} him at the party.	Nós não o vimos na festa.	ponte a2 passado producao
+I'm {{c1::going to}} call her tomorrow morning.	Eu vou ligar para ela amanhã de manhã.	ponte a2 rotina producao
+I think this is a {{c1::better idea than}} the other one.	Eu acho que essa é uma ideia melhor que a outra.	ponte a2 opiniao producao
+{{c1::Would you mind}} closing the window?	Você se importaria de fechar a janela?	ponte a2 pedido producao
+I've lived here {{c1::for}} five years.	Eu moro aqui há cinco anos.	ponte a2 rotina producao
+How long {{c1::have you been}} studying English?	Há quanto tempo você estuda inglês?	ponte a2 rotina producao
+The flight {{c1::was delayed}} by two hours.	O voo atrasou duas horas.	ponte a2 viagem producao
+It's not {{c1::as expensive as}} I expected.	Não é tão caro quanto eu esperava.	ponte a2 opiniao producao
+Sorry, could you say that again? I {{c1::didn't catch}} the last part.	Desculpe, você pode repetir? Não peguei a última parte.	ponte b1 reuniao producao
+Can I {{c1::jump in}} here for a second?	Posso entrar aqui um segundo?	ponte b1 reuniao producao
+Let me check and {{c1::get back to you}} today.	Deixa eu verificar e te retorno hoje.	ponte b1 reuniao producao
+Just to make sure we're {{c1::on the same page}}.	Só para garantir que estamos alinhados.	ponte b1 reuniao producao
+I'm {{c1::writing about}} the report we discussed last week.	Estou escrevendo sobre o relatório que discutimos na semana passada.	ponte b1 email producao
+Could you {{c1::let me know}} by Friday?	Você poderia me avisar até sexta?	ponte b1 email producao
+{{c1::Apologies for}} the short notice.	Desculpe pelo pouco tempo de aviso.	ponte b1 email producao
+The app {{c1::crashes}} every time I try to upload a large file.	O aplicativo trava toda vez que eu tento subir um arquivo grande.	ponte b1 tecnologia producao
+I've {{c1::tried restarting}} it, but the problem is still there.	Eu tentei reiniciar, mas o problema continua.	ponte b1 tecnologia producao
+It seems to be {{c1::related to}} the file size.	Parece estar relacionado ao tamanho do arquivo.	ponte b1 tecnologia producao
+I see {{c1::where you're coming from}}, but I'm not sure I agree.	Entendo o seu ponto, mas não sei se concordo.	ponte b1 opiniao producao
+{{c1::What if we tried}} a different approach?	E se a gente tentasse uma abordagem diferente?	ponte b1 opiniao producao
+By the time we arrived, the meeting {{c1::had already started}}.	Quando chegamos, a reunião já tinha começado.	ponte b1 passado producao
+{{c1::Although}} it was raining, we decided to go out.	Embora estivesse chovendo, decidimos sair.	ponte b1 conectivos producao
+He was tired; {{c1::nevertheless}}, he finished the work.	Ele estava cansado; ainda assim, terminou o trabalho.	ponte b1 conectivos producao
+Something {{c1::came up}} and I need to reschedule.	Surgiu um imprevisto e preciso remarcar.	ponte b1 viagem producao
+{{c1::Off the top of my head}}, I'd say around thirty percent.	Assim de cabeça, eu diria uns trinta por cento.	ponte b2 reuniao producao
+I don't have that number {{c1::in front of me}} right now.	Não tenho esse número aqui comigo agora.	ponte b2 reuniao producao
+My {{c1::recommendation}} is to go with the first option.	Minha recomendação é seguir com a primeira opção.	ponte b2 email producao
+{{c1::Happy to}} jump on a quick call if that's easier.	Fico à disposição para uma call rápida, se for mais fácil.	ponte b2 email producao
+My only {{c1::concern}} is that we'd lose three weeks.	Minha única preocupação é que perderíamos três semanas.	ponte b2 opiniao producao
+{{c1::That said}}, I think the trade-off is worth it.	Dito isso, acho que a troca compensa.	ponte b2 opiniao producao
+{{c1::Turns out}} he had been working there the whole time.	Acontece que ele estava trabalhando lá esse tempo todo.	ponte b2 narrativa producao
+It {{c1::ended up being}} the best part of the trip.	Acabou sendo a melhor parte da viagem.	ponte b2 narrativa producao
+{{c1::Rather than}} rewriting it, we refactored the worst file first.	Em vez de reescrever, refatoramos primeiro o pior arquivo.	ponte b2 tecnologia producao
+This {{c1::would have been caught}} by a test.	Isso teria sido pego por um teste.	ponte b2 tecnologia producao
+{{c1::Whereas}} the first approach is faster, the second is safer.	Enquanto a primeira abordagem é mais rápida, a segunda é mais segura.	ponte b2 conectivos producao
+{{c1::Provided that}} we get approval, we can start on Monday.	Desde que consigamos aprovação, podemos começar na segunda.	ponte b2 conectivos producao
+{{c1::What I took from it}} is that data changes the conversation.	O que eu tirei disso é que dados mudam a conversa.	ponte b2 entrevista producao
+Rather than pushing back, I offered a {{c1::middle ground}}.	Em vez de resistir, ofereci um meio-termo.	ponte b2 entrevista producao

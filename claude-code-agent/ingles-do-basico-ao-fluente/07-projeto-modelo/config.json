@@ -1,0 +1,18 @@
+{
+  "nome_do_projeto": "Projeto Ponte",
+  "baralho": "Ingles::Ponte",
+  "nivel_alvo": "B2",
+  "meta_diaria_min": 40,
+  "cartoes_novos_por_dia": 10,
+  "horas_por_nivel": {
+    "A1": 100,
+    "A2": 200,
+    "B1": 400,
+    "B2": 600,
+    "C1": 800,
+    "C2": 1200
+  },
+  "arquivo_de_frases": "deck/frases-nucleo.tsv",
+  "diretorio_de_saida": "saida",
+  "registro_de_estudo": "saida/registro.jsonl"
+}

@@ -1,0 +1,27 @@
+=== Projeto Ponte · geração de baralho ===
+frases selecionadas : 50
+cartões de reconhecimento: 50
+cartões de produção (cloze): 50
+total de cartões    : 100
+
+por nível:
+  A1:  10
+  A2:  10
+  B1:  16
+  B2:  14
+
+por assunto:
+  apresentacao     4
+  conectivos       4
+  email            5
+  entrevista       2
+  narrativa        2
+  opiniao          6
+  passado          4
+  pedido           3
+  reuniao          6
+  rotina           6
+  tecnologia       5
+  viagem           3
+
+arquivos escritos
