@@ -1,0 +1,63 @@
+; /etc/systemd/system/cofre-de-recados.service
+;
+; A entrega clássica em servidor Linux, sem contêiner.
+; Instale com o deploy/install.sh, ou copie à mão e rode:
+;   sudo systemctl daemon-reload && sudo systemctl enable --now cofre-de-recados
+
+[Unit]
+Description=Cofre de Recados — projeto-modelo do curso de variáveis de ambiente
+Documentation=file:/opt/cofre-de-recados/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cofre
+Group=cofre
+WorkingDirectory=/opt/cofre-de-recados
+
+; Configuração NÃO secreta pode ficar à vista: aparece em `systemctl show`.
+Environment="NODE_ENV=production"
+Environment="LOG_LEVEL=info"
+
+; Segredos vêm de um arquivo com permissão 640 root:cofre.
+; O "-" no início tornaria o arquivo opcional; aqui ele é obrigatório de propósito:
+; melhor não subir do que subir sem configuração.
+EnvironmentFile=/etc/cofre-de-recados/env
+
+; Falha ANTES de abrir a porta, com mensagem legível no journal.
+ExecStartPre=/usr/bin/node /opt/cofre-de-recados/src/check-config.mjs
+ExecStart=/usr/bin/node /opt/cofre-de-recados/src/app.mjs
+
+Restart=on-failure
+RestartSec=5
+; 78 = EX_CONFIG: configuração errada não melhora com reinício. Sem esta linha,
+; o systemd reinicia a cada 5 s para sempre e enche o disco de log.
+RestartPreventExitStatus=78
+
+; Desligamento elegante: o app trata SIGTERM.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+; ── Blindagem: barata, e cada linha reduz o estrago de uma invasão ──────────
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+; Se precisar escrever em disco, libere só o diretório necessário:
+; ReadWritePaths=/var/lib/cofre-de-recados
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+# Demonstra as TRÊS formas de entregar configuração a um contêiner,
+# lado a lado, com a recomendação de cada uma.
+#
+#   docker compose up --build
+#   curl -s localhost:8080/health
+services:
+  app:
+    build: .
+    ports: ["8080:8080"]
+
+    # (1) Configuração NÃO secreta: variável de ambiente direta. Visível em
+    #     `docker inspect`, e tudo bem — não há nada a esconder aqui.
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+      LOG_LEVEL: info
+      EXPOR_METRICAS: "false"
+      # (2) Segredos pelo padrão _FILE: o valor NÃO aparece em `docker inspect`,
+      #     não é herdado por processos filhos, e pode ser rotacionado sem
+      #     recriar o contêiner (basta trocar o conteúdo do arquivo).
+      DATABASE_URL_FILE: /run/secrets/database_url
+      SESSION_SECRET_FILE: /run/secrets/session_secret
+      API_KEY_FILE: /run/secrets/api_key
+
+    secrets: [database_url, session_secret, api_key]
+
+    # (3) env_file: prático em desenvolvimento, DESACONSELHADO em produção —
+    #     o arquivo inteiro vira variável de ambiente do processo.
+    #     `required: false` (Compose v2.24+) evita quebrar quando não existe.
+    env_file:
+      - path: ./.env
+        required: false
+
+    restart: unless-stopped
+
+secrets:
+  # Em Docker Swarm/Kubernetes estes viriam do gerenciador de segredos do
+  # orquestrador. Com `docker compose`, vêm de arquivos locais — que estão
+  # no .gitignore e devem ter permissão 600.
+  database_url:   { file: ./secrets/database_url }
+  session_secret: { file: ./secrets/session_secret }
+  api_key:        { file: ./secrets/api_key }

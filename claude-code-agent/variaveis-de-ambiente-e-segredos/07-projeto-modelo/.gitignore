@@ -1,0 +1,13 @@
+# Segredos — NUNCA versionar
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+
+# Descriptografados por engano
+*.dec
+*.decrypted
+
+node_modules/

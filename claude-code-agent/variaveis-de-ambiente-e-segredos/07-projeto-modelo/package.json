@@ -1,0 +1,15 @@
+{
+  "name": "cofre-de-recados",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Projeto-modelo do curso variaveis-de-ambiente-e-segredos. Zero dependencias.",
+  "engines": { "node": ">=22.0.0" },
+  "scripts": {
+    "start": "node src/app.mjs",
+    "dev": "node --env-file-if-exists=.env --watch src/app.mjs",
+    "check-config": "node src/check-config.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "check-env": "bash scripts/check-env.sh"
+  }
+}

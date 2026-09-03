@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+secrets/
+node_modules
+test
+*.md
+*.pem
+*.key
