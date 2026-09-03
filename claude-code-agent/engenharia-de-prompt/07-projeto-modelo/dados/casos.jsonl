@@ -1,0 +1,22 @@
+{"id": "c01", "chamado": "Fui cobrado duas vezes na fatura de agosto, quero estorno de uma delas.", "categoria": "cobranca", "urgencia": "normal"}
+{"id": "c02", "chamado": "Deu erro na hora de pagar e o valor foi debitado do cartao mesmo assim.", "categoria": "cobranca", "urgencia": "normal"}
+{"id": "c03", "chamado": "O boleto de julho veio com valor diferente do plano que contratei.", "categoria": "cobranca", "urgencia": "normal"}
+{"id": "c04", "chamado": "Cancelei o plano mes passado e continuo sendo cobrado, ja e prejuizo de 400 reais.", "categoria": "cobranca", "urgencia": "alta"}
+{"id": "c05", "chamado": "Preciso do reembolso proporcional dos dias que nao usei.", "categoria": "cobranca", "urgencia": "normal"}
+{"id": "c06", "chamado": "Erro 500 em todas as chamadas da API desde as 14h, producao parada.", "categoria": "bug", "urgencia": "alta"}
+{"id": "c07", "chamado": "A tela de relatorios trava quando eu filtro por data.", "categoria": "bug", "urgencia": "normal"}
+{"id": "c08", "chamado": "O painel nao carrega no Firefox, fica em branco depois do login.", "categoria": "bug", "urgencia": "normal"}
+{"id": "c09", "chamado": "O deploy quebrou e o site esta fora do ar para todos os usuarios.", "categoria": "bug", "urgencia": "alta"}
+{"id": "c10", "chamado": "Falha ao subir arquivos maiores que 10 MB, retorna exception no console.", "categoria": "bug", "urgencia": "normal"}
+{"id": "c11", "chamado": "Esqueci a senha e o e-mail de recuperacao nao chega.", "categoria": "acesso", "urgencia": "normal"}
+{"id": "c12", "chamado": "Minha conta foi bloqueada depois de tres tentativas de login.", "categoria": "acesso", "urgencia": "normal"}
+{"id": "c13", "chamado": "Perdi o celular e nao consigo mais passar pelo 2FA da minha conta.", "categoria": "acesso", "urgencia": "normal"}
+{"id": "c14", "chamado": "Ninguem da equipe consegue entrar no painel desde ontem a noite.", "categoria": "acesso", "urgencia": "alta"}
+{"id": "c15", "chamado": "Suspeito que a senha de um colaborador vazou, preciso revogar o acesso dele agora.", "categoria": "acesso", "urgencia": "alta"}
+{"id": "c16", "chamado": "Como faco para apontar um dominio proprio para o meu site?", "categoria": "duvida", "urgencia": "normal"}
+{"id": "c17", "chamado": "Existe limite de banda no plano intermediario?", "categoria": "duvida", "urgencia": "normal"}
+{"id": "c18", "chamado": "Onde fica a configuracao de backup automatico?", "categoria": "duvida", "urgencia": "normal"}
+{"id": "c19", "chamado": "Consigo migrar do plano mensal para o anual no meio do ciclo?", "categoria": "duvida", "urgencia": "normal"}
+{"id": "c20", "chamado": "Duvida: voces suportam PostgreSQL 17 nos bancos gerenciados?", "categoria": "duvida", "urgencia": "normal"}
+{"id": "c21", "chamado": "Erro ao emitir a nota fiscal da fatura de agosto, o download nao completa.", "categoria": "cobranca", "urgencia": "normal"}
+{"id": "c22", "chamado": "Urgente: o certificado SSL expirou e o site esta dando aviso de inseguro.", "categoria": "bug", "urgencia": "alta"}

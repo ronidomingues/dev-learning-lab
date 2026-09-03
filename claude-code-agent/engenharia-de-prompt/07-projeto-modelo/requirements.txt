@@ -1,0 +1,3 @@
+# O projeto roda SEM nenhuma dependência (provedor simulado, stdlib apenas).
+# Instale isto só quando for usar --provedor anthropic, contra a API real.
+anthropic>=0.123.0
