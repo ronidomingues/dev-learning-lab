@@ -1,0 +1,16 @@
+{
+  "name": "cofre-de-notas",
+  "version": "1.0.0",
+  "description": "API de notas com autenticacao JWT implementada do zero, sem dependencias externas.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/servidor.js",
+    "test": "node --test",
+    "chaves": "node src/ferramenta-chaves.js"
+  },
+  "license": "MIT",
+  "private": true
+}

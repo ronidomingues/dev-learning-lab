@@ -1,0 +1,78 @@
+# Requisicoes prontas para o cofre-de-notas.
+#
+# Use com a extensao "REST Client" do VS Code, com o IntelliJ HTTP Client,
+# ou copie os comandos curl equivalentes do README.
+
+@base = http://localhost:3000
+@email = ana@exemplo.com
+@senha = uma-senha-longa-2026
+
+### 0. saude do servico
+GET {{base}}/saude
+
+### 1. chave publica — e assim que qualquer outro servico verifica nossos tokens
+GET {{base}}/.well-known/jwks.json
+
+### 2. registrar
+POST {{base}}/auth/registrar
+Content-Type: application/json
+
+{ "email": "{{email}}", "senha": "{{senha}}" }
+
+### 3. login — guarda o access token na variavel
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{email}}", "senha": "{{senha}}" }
+
+@access = {{login.response.body.access_token}}
+@refresh = {{login.response.body.refresh_token}}
+
+### 4. rota protegida SEM token -> 401 + WWW-Authenticate
+GET {{base}}/notas
+
+### 5. rota protegida COM token
+GET {{base}}/notas
+Authorization: Bearer {{access}}
+
+### 6. criar nota
+POST {{base}}/notas
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{ "texto": "comprar pao" }
+
+### 7. ver o conteudo do token (SEM verificar) — so didatico
+POST {{base}}/debug/decodificar
+Content-Type: application/json
+
+{ "token": "{{access}}" }
+
+### 8. renovar — devolve access novo E refresh novo (rotacao)
+# @name renovar
+POST {{base}}/auth/refresh
+Content-Type: application/json
+
+{ "refresh_token": "{{refresh}}" }
+
+### 9. REUSO: mandar de novo o refresh antigo -> queima a familia inteira
+POST {{base}}/auth/refresh
+Content-Type: application/json
+
+{ "refresh_token": "{{refresh}}" }
+
+### 10. rota de admin com usuario comum -> 403
+GET {{base}}/admin/sessoes
+Authorization: Bearer {{access}}
+
+### 11. logout — mata access (jti) e refresh
+POST {{base}}/auth/logout
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{ "refresh_token": "{{refresh}}" }
+
+### 12. o access token de antes ja nao vale mais
+GET {{base}}/notas
+Authorization: Bearer {{access}}
