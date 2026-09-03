@@ -1,0 +1,11 @@
+{
+  "usuarios": [
+    { "id": 1, "login": "ana",   "senha": "primavera2025", "papel": "cliente", "saldo": 1240.55, "cpf": "111.111.111-11" },
+    { "id": 2, "login": "bruno", "senha": "bruno123",      "papel": "cliente", "saldo": 87.10,   "cpf": "222.222.222-22" },
+    { "id": 3, "login": "admin", "senha": "S3nh@Admin!",   "papel": "admin",   "saldo": 0.0,     "cpf": "000.000.000-00" }
+  ],
+  "config": {
+    "segredo_jwt": "chave-super-secreta-que-nao-deveria-vazar-2019",
+    "versao": "1.4.2"
+  }
+}
