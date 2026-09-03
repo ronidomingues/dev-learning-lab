@@ -1,0 +1,542 @@
+openapi: 3.1.0
+
+# ============================================================================
+# O CONTRATO. Escrito à mão, ANTES do código (design-first).
+#
+# Este arquivo é o que o consumidor lê e o que se revisa em pull request.
+# Mudar aqui é uma decisão de produto; mudar no código sem mudar aqui é um bug.
+#
+# Valide com:  npx @stoplight/spectral-cli lint openapi.yaml
+# Compare versões:  npx oasdiff breaking openapi-anterior.yaml openapi.yaml
+# ============================================================================
+
+info:
+  title: API de Biblioteca
+  version: 1.0.0
+  summary: Catálogo de livros e controle de empréstimos.
+  description: |
+    Projeto-modelo do curso de APIs.
+
+    ## Autenticação
+    Todas as rotas, exceto `/health*` e `/openapi.json`, exigem
+    `Authorization: Bearer <token>`.
+
+    ## Idempotência
+    Todo `POST` exige o cabeçalho `Idempotency-Key` com um UUID único por
+    operação. Repetir a mesma chave com o mesmo corpo devolve a resposta
+    original sem reprocessar; com corpo diferente devolve `422`.
+
+    ## Concorrência
+    `PATCH` exige `If-Match` com o `ETag` obtido num `GET`. Sem ele, `428`.
+    Se o recurso mudou nesse meio-tempo, `412`.
+
+    ## Erros
+    Todos os erros seguem o RFC 9457 (`application/problem+json`).
+    **Programe contra o campo `type`**, que é estável; `title` e `detail` são
+    para humanos e podem mudar.
+  contact:
+    name: Equipe de Plataforma
+    email: api@exemplo.com
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: desenvolvimento local
+
+tags:
+  - name: saude
+    description: Sondas de disponibilidade
+  - name: livros
+    description: Catálogo
+  - name: emprestimos
+    description: Empréstimos e devoluções
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [saude]
+      summary: O processo está vivo
+      description: |
+        Não consulta dependência nenhuma, de propósito. Se esta sonda falhasse
+        por causa do banco, o orquestrador reiniciaria o processo sem necessidade.
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: vivo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, uptime_s]
+                properties:
+                  status:   { type: string, const: ok }
+                  uptime_s: { type: integer, minimum: 0 }
+                  versao:   { type: string }
+
+  /health/pronto:
+    get:
+      tags: [saude]
+      summary: Pronto para receber tráfego
+      description: Aqui sim se checam as dependências.
+      operationId: getHealthPronto
+      security: []
+      responses:
+        '200':
+          description: pronto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:              { type: string, const: pronto }
+                  livros:              { type: integer }
+                  emprestimos:         { type: integer }
+                  emprestimos_abertos: { type: integer }
+
+  /openapi.json:
+    get:
+      tags: [saude]
+      summary: O contrato desta API
+      operationId: getOpenapi
+      security: []
+      responses:
+        '200':
+          description: contrato
+          content:
+            application/json:
+              schema: { type: object }
+
+  /livros:
+    get:
+      tags: [livros]
+      summary: Lista livros
+      description: |
+        Paginação por **cursor**. O cursor é opaco: não construa um à mão, use
+        sempre o `proximo_cursor` da resposta anterior.
+      operationId: listarLivros
+      parameters:
+        - name: limite
+          in: query
+          description: Itens por página.
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: cursor
+          in: query
+          description: Valor de `paginacao.proximo_cursor` da resposta anterior.
+          schema: { type: string }
+        - name: autor
+          in: query
+          description: Filtra por trecho do nome do autor, sem diferenciar maiúsculas.
+          schema: { type: string }
+        - name: disponivel
+          in: query
+          description: Filtra por disponibilidade.
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: página de livros
+          headers:
+            X-RateLimit-Remaining: { $ref: '#/components/headers/RateLimitRemaining' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [dados, paginacao]
+                properties:
+                  dados:
+                    type: array
+                    items: { $ref: '#/components/schemas/Livro' }
+                  paginacao: { $ref: '#/components/schemas/Paginacao' }
+        '400': { $ref: '#/components/responses/Problema400' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '429': { $ref: '#/components/responses/Problema429' }
+
+    post:
+      tags: [livros]
+      summary: Cria um livro
+      operationId: criarLivro
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CriarLivro' }
+      responses:
+        '201':
+          description: criado
+          headers:
+            Location:
+              description: URI do recurso criado.
+              schema: { type: string }
+            ETag:
+              description: Versão da representação, para uso em `If-Match`.
+              schema: { type: string }
+            Idempotency-Replayed:
+              description: Presente quando a resposta veio do registro de idempotência.
+              schema: { type: string, const: 'true' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Livro' }
+        '400': { $ref: '#/components/responses/Problema400' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '409':
+          description: ISBN já cadastrado
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '413': { $ref: '#/components/responses/Problema413' }
+        '415': { $ref: '#/components/responses/Problema415' }
+        '422': { $ref: '#/components/responses/Problema422' }
+        '429': { $ref: '#/components/responses/Problema429' }
+
+  /livros/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [livros]
+      summary: Obtém um livro
+      description: Envie `If-None-Match` com o `ETag` conhecido para receber `304`.
+      operationId: obterLivro
+      parameters:
+        - name: If-None-Match
+          in: header
+          description: ETag conhecido pelo cliente.
+          schema: { type: string }
+      responses:
+        '200':
+          description: encontrado
+          headers:
+            ETag:
+              schema: { type: string }
+            Cache-Control:
+              schema: { type: string, examples: ['private, max-age=30'] }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Livro' }
+        '304':
+          description: não modificado desde o ETag informado; sem corpo
+          headers:
+            ETag: { schema: { type: string } }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '404': { $ref: '#/components/responses/Problema404' }
+
+    patch:
+      tags: [livros]
+      summary: Altera campos de um livro
+      description: |
+        **Exige `If-Match`.** Faça um `GET`, guarde o `ETag` e envie-o aqui.
+        Isso evita o *lost update*: se outra pessoa alterou o recurso entre a
+        sua leitura e a sua escrita, a resposta é `412` e nada é sobrescrito.
+      operationId: atualizarLivro
+      parameters:
+        - name: If-Match
+          in: header
+          required: true
+          description: ETag obtido no GET.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AtualizarLivro' }
+      responses:
+        '200':
+          description: atualizado
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Livro' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '404': { $ref: '#/components/responses/Problema404' }
+        '409':
+          description: ISBN já pertence a outro livro
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '412':
+          description: o recurso mudou desde a sua leitura
+          headers:
+            ETag:
+              description: O ETag atual, para você reler e decidir.
+              schema: { type: string }
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '422': { $ref: '#/components/responses/Problema422' }
+        '428':
+          description: If-Match é obrigatório nesta operação
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+
+  /emprestimos:
+    get:
+      tags: [emprestimos]
+      summary: Lista empréstimos
+      operationId: listarEmprestimos
+      parameters:
+        - name: abertos
+          in: query
+          description: Se `true`, só os ainda não devolvidos.
+          schema: { type: boolean, default: false }
+        - name: livro_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: lista
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dados:
+                    type: array
+                    items: { $ref: '#/components/schemas/Emprestimo' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+
+    post:
+      tags: [emprestimos]
+      summary: Registra um empréstimo
+      description: Torna o livro indisponível. Um livro emprestado não pode ser emprestado de novo.
+      operationId: criarEmprestimo
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CriarEmprestimo' }
+      responses:
+        '201':
+          description: emprestado
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Emprestimo' }
+        '400': { $ref: '#/components/responses/Problema400' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '404': { $ref: '#/components/responses/Problema404' }
+        '409':
+          description: |
+            O livro já está emprestado. É `409` e não `422` porque a requisição
+            está correta — é o **estado** do recurso que não permite a operação.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problema' }
+        '422': { $ref: '#/components/responses/Problema422' }
+
+  /emprestimos/{id}/devolucao:
+    post:
+      tags: [emprestimos]
+      summary: Registra a devolução
+      description: |
+        Idempotente por natureza: devolver duas vezes devolve `200` com o mesmo
+        estado, não um erro. Repetir não é erro quando o efeito é o mesmo.
+      operationId: devolverEmprestimo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: devolvido (ou já estava devolvido)
+          headers:
+            Idempotency-Replayed:
+              schema: { type: string, const: 'true' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Emprestimo' }
+        '401': { $ref: '#/components/responses/Problema401' }
+        '403': { $ref: '#/components/responses/Problema403' }
+        '404': { $ref: '#/components/responses/Problema404' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Token opaco. Escopos:
+        `livros:ler`, `livros:escrever`, `emprestimos:ler`, `emprestimos:escrever`.
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        UUID único desta operação. Repetir a mesma chave com o mesmo corpo
+        devolve a resposta original sem reprocessar.
+      schema: { type: string, minLength: 8, maxLength: 200 }
+
+  headers:
+    RateLimitRemaining:
+      description: Requisições restantes na janela atual.
+      schema: { type: integer }
+
+  schemas:
+    Livro:
+      type: object
+      required: [id, titulo, autor, disponivel, criado_em, versao]
+      properties:
+        id:            { type: string, format: uuid, readOnly: true }
+        titulo:        { type: string, minLength: 1, maxLength: 200 }
+        autor:         { type: string, minLength: 1, maxLength: 120 }
+        ano:           { type: [integer, 'null'], minimum: 1450 }
+        isbn:          { type: [string, 'null'], pattern: '^97[89](-?\d){10}$' }
+        disponivel:    { type: boolean, readOnly: true }
+        criado_em:     { type: string, format: date-time, readOnly: true }
+        atualizado_em: { type: string, format: date-time, readOnly: true }
+        versao:        { type: integer, readOnly: true }
+      examples:
+        - id: 3f2a1b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c
+          titulo: Dom Casmurro
+          autor: Machado de Assis
+          ano: 1899
+          isbn: '9788572326972'
+          disponivel: true
+          criado_em: '2026-01-01T00:00:00.000Z'
+          atualizado_em: '2026-01-01T00:00:00.000Z'
+          versao: 1
+
+    CriarLivro:
+      type: object
+      required: [titulo, autor]
+      # Campos desconhecidos são recusados: isso pega erro de digitação do
+      # cliente na hora, em vez de ignorar em silêncio.
+      additionalProperties: false
+      properties:
+        titulo: { type: string, minLength: 1, maxLength: 200 }
+        autor:  { type: string, minLength: 1, maxLength: 120 }
+        ano:    { type: integer, minimum: 1450 }
+        isbn:   { type: string, pattern: '^97[89](-?\d){10}$' }
+
+    AtualizarLivro:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        titulo: { type: string, minLength: 1, maxLength: 200 }
+        autor:  { type: string, minLength: 1, maxLength: 120 }
+        ano:    { type: integer, minimum: 1450 }
+        isbn:   { type: string, pattern: '^97[89](-?\d){10}$' }
+
+    Emprestimo:
+      type: object
+      required: [id, livro_id, pessoa, emprestado_em]
+      properties:
+        id:            { type: string, format: uuid, readOnly: true }
+        livro_id:      { type: string, format: uuid }
+        pessoa:        { type: string, minLength: 2, maxLength: 120 }
+        emprestado_em: { type: string, format: date-time, readOnly: true }
+        devolvido_em:  { type: [string, 'null'], format: date-time, readOnly: true }
+
+    CriarEmprestimo:
+      type: object
+      required: [livro_id, pessoa]
+      additionalProperties: false
+      properties:
+        livro_id: { type: string, format: uuid }
+        pessoa:   { type: string, minLength: 2, maxLength: 120 }
+
+    Paginacao:
+      type: object
+      required: [limite]
+      properties:
+        limite: { type: integer }
+        total:  { type: integer }
+        proximo_cursor:
+          type: [string, 'null']
+          description: Passe em `?cursor=`. `null` quando não há próxima página.
+
+    Problema:
+      type: object
+      description: RFC 9457 — Problem Details for HTTP APIs.
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            **É contra este campo que o cliente deve programar.** É estável e
+            documentado; `title` e `detail` podem mudar.
+        title:    { type: string, description: Resumo estável, para humanos. }
+        status:   { type: integer }
+        detail:   { type: string, description: Explicação desta ocorrência. }
+        instance: { type: string, description: Identificador desta requisição. }
+        erros:
+          type: array
+          description: Presente em erros de validação.
+          items:
+            type: object
+            properties:
+              campo:  { type: string }
+              motivo: { type: string }
+
+  responses:
+    Problema400:
+      description: Requisição malformada
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema401:
+      description: Não autenticado
+      headers:
+        WWW-Authenticate:
+          schema: { type: string, examples: ['Bearer realm="api"'] }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema403:
+      description: Autenticado, mas sem o escopo necessário
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema404:
+      description: Não encontrado
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema413:
+      description: Corpo grande demais
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema415:
+      description: Content-Type não suportado
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema422:
+      description: Sintaxe válida, conteúdo inválido
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }
+    Problema429:
+      description: Limite de requisições excedido
+      headers:
+        Retry-After:
+          description: Segundos a esperar antes de tentar de novo.
+          schema: { type: integer }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problema' }

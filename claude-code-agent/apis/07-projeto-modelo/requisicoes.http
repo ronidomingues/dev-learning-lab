@@ -1,0 +1,123 @@
+### Requisições executáveis — extensão "REST Client" do VS Code.
+### Este arquivo é texto, versiona no Git e vira documentação executável do time.
+### Clique em "Send Request" acima de cada bloco.
+
+@base = http://localhost:3000
+@leitor = tok_leitor_demo
+@biblio = tok_biblio_demo
+
+### Saúde (sem autenticação)
+GET {{base}}/health
+
+### Pronto para receber tráfego
+GET {{base}}/health/pronto
+
+### O contrato
+GET {{base}}/openapi.json
+
+### Sem token -> 401 com WWW-Authenticate
+GET {{base}}/livros
+
+### Listar (primeira página)
+# @name lista
+GET {{base}}/livros?limite=2
+Authorization: Bearer {{biblio}}
+
+### Próxima página, usando o cursor da resposta anterior
+GET {{base}}/livros?limite=2&cursor={{lista.response.body.paginacao.proximo_cursor}}
+Authorization: Bearer {{biblio}}
+
+### Filtrar por autor
+GET {{base}}/livros?autor=Machado
+Authorization: Bearer {{biblio}}
+
+### Obter um livro (guarde o ETag da resposta)
+# @name umLivro
+GET {{base}}/livros/{{lista.response.body.dados[0].id}}
+Authorization: Bearer {{biblio}}
+
+### Cache condicional -> 304 sem corpo
+GET {{base}}/livros/{{lista.response.body.dados[0].id}}
+Authorization: Bearer {{biblio}}
+If-None-Match: {{umLivro.response.headers.etag}}
+
+### HEAD: mesmos cabeçalhos, sem corpo
+HEAD {{base}}/livros/{{lista.response.body.dados[0].id}}
+Authorization: Bearer {{biblio}}
+
+### Criar (idempotente) -> 201 + Location
+POST {{base}}/livros
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+Idempotency-Key: 4f6a1c7e-2b3d-4a5f-8c9e-1d2f3a4b5c6d
+
+{
+  "titulo": "Iracema",
+  "autor": "José de Alencar",
+  "ano": 1865,
+  "isbn": "9788535911404"
+}
+
+### Repita o bloco acima: mesma chave -> MESMO id, sem duplicar
+
+### Validação falhando -> 422 listando os campos
+POST {{base}}/livros
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+Idempotency-Key: 5a7b2d8f-3c4e-4b6a-9d0f-2e3a4b5c6d7e
+
+{
+  "titulo": "",
+  "ano": 3000,
+  "preco": 10
+}
+
+### Escopo insuficiente -> 403
+POST {{base}}/livros
+Authorization: Bearer {{leitor}}
+Content-Type: application/json
+Idempotency-Key: 6b8c3e9a-4d5f-4c7b-8e1a-3f4b5c6d7e8f
+
+{ "titulo": "Negado", "autor": "Ninguém" }
+
+### PATCH sem If-Match -> 428
+PATCH {{base}}/livros/{{lista.response.body.dados[0].id}}
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+
+{ "ano": 1900 }
+
+### PATCH com If-Match -> 200
+PATCH {{base}}/livros/{{lista.response.body.dados[0].id}}
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+If-Match: {{umLivro.response.headers.etag}}
+
+{ "ano": 1900 }
+
+### Emprestar -> 201
+POST {{base}}/emprestimos
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+Idempotency-Key: 7c9d4f0b-5e6a-4d8c-9f2b-4a5c6d7e8f90
+
+{ "livro_id": "{{lista.response.body.dados[0].id}}", "pessoa": "Ana Rosa" }
+
+### Emprestar de novo -> 409 (conflito de estado)
+POST {{base}}/emprestimos
+Authorization: Bearer {{biblio}}
+Content-Type: application/json
+Idempotency-Key: 8d0e5a1c-6f7b-4e9d-8a3c-5b6d7e8f9012
+
+{ "livro_id": "{{lista.response.body.dados[0].id}}", "pessoa": "Bruno Lima" }
+
+### Listar empréstimos abertos
+GET {{base}}/emprestimos?abertos=true
+Authorization: Bearer {{biblio}}
+
+### Método não permitido -> 405 com Allow
+DELETE {{base}}/livros
+Authorization: Bearer {{biblio}}
+
+### OPTIONS -> 204 com Allow (inclui HEAD)
+OPTIONS {{base}}/livros
