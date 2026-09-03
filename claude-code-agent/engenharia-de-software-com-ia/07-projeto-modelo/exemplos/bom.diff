@@ -1,0 +1,12 @@
+diff --git a/portao/regras/tamanho.py b/portao/regras/tamanho.py
+index 1111111..2222222 100644
+--- a/portao/regras/tamanho.py
++++ b/portao/regras/tamanho.py
+@@ -20,6 +20,9 @@ def verificar(diff, cfg):
+     r = Resultado(regra=NOME)
+ 
++    if not diff.arquivos:
++        return r
++
+     if len(diff.arquivos) > cfg.max_arquivos:
+         r.achados.append(

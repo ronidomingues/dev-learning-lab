@@ -1,0 +1,9 @@
+{
+  "escopo_permitido": ["portao/**", "tests/**", "exemplos/**", "*.md", "*.json", "*.py"],
+  "escopo_proibido": ["**/*.pem", "**/*.key", ".env", ".env.*"],
+  "max_alteracoes_total": 400,
+  "max_alteracoes_por_arquivo": 250,
+  "max_arquivos": 15,
+  "dependencias_permitidas": [],
+  "arquivo_de_especificacao": "ESPEC.md"
+}
