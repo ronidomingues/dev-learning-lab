@@ -1428,6 +1428,48 @@ navegador, e deploy atrás de proxy com WebSocket.
 
 ---
 
+### [engenharia-reversa](engenharia-reversa/00-MAPA.md)
+Como um programa executável guarda segredos, e como um humano recupera a lógica que o
+compilador escondeu. Da analogia do bolo/receita à descompilação neural com LLM (2026).
+Assembly x86-64 e ARM64 do zero, formatos ELF/PE/Mach-O byte a byte, análise estática
+(desmontar/descompilar) e dinâmica (GDB/Frida/tracing), a pilha e as convenções de chamada,
+estruturas de dados no binário (struct/vtable/C++), ofuscação/packers e anti-análise,
+análise de malware, caça a vulnerabilidades (ROP/fuzzing), firmware e mobile, execução
+simbólica e os limites teóricos (indecidibilidade), e a linha legal (Lei 9.609/98 omissa no
+Brasil, DMCA §1201, Diretiva 2009/24/CE).
+
+| A | B | C | D | E | Glossário |
+|---|---|---|---|---|---|
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+- **Feito:** 33 documentos + projeto-modelo executável. Bloco A completo (manual de
+  instalação cobrindo GCC/GDB/binutils, Ghidra/Java 21, radare2/rizin/Cutter, IDA Free,
+  Frida, x64dbg, jadx/apktool/dnSpy, binwalk/QEMU e a família Python de RE — Capstone/angr/
+  pwntools/LIEF — nos três sistemas operacionais, com PATH, permissões, venv, proxy,
+  desinstalação e tabela de erros literais; alternativa sem instalar nada com godbolt/dogbolt;
+  12 exemplos completos, dois de produção). Núcleo do 10 ao 65 (fundamentos → história →
+  **arquitetura e assembly** → formatos de binário → estática → dinâmica → **pilha e
+  convenções** → estruturas de dados → ofuscação/packers → anti-análise → malware →
+  vulnerabilidades → firmware → mobile/managed → teoria avançada → estado da arte de
+  03/09/2026). 12 laboratórios, 12 erros + 10 mitos + 6 más práticas, custos com data e
+  câmbio (IDA/Binary Ninja/GREM/OSED), cursos PT/EN/FR pesquisados na web, bibliografia
+  comentada (Yurichev gratuito), ~120 termos no glossário.
+- **Projeto-modelo:** `07-projeto-modelo/` — **crackme de 3 níveis** (senha em texto claro →
+  XOR de byte único → serial validado por regras, estilo licença) + **solucionador
+  automático em Python** que resolve os três sozinho, ilustrando três técnicas reais
+  (string harvesting, ataque de chave XOR e busca por restrições), com o **binário como
+  oráculo** (funciona até no binário *stripped*). Compila em 3 variantes (`-g`, stripped,
+  `-O2 -s`) para o aluno ver como símbolos e otimização mudam a dificuldade. `SOLUCAO.md`
+  traz o gabarito à mão com **desmontagem real** (incl. o `imul 0x92492493` = `% 7`).
+- **Verificação:** **make check com 21 asserções + solver 3/3 em duas variantes, tudo
+  aprovado** (Ubuntu 22.04, GCC 11.4, GDB 12.1, Python 3.10, binutils 2.38). Solver
+  cronometrado em ~6 s, confirmado no binário sem símbolos. Versões de ferramentas (Ghidra
+  12.1.3, radare2 6.2.0, Frida 17.17.0, JDK 21), preços (hex-rays, Binary Ninja, SANS/OffSec)
+  e cursos pesquisados na web em 03/09/2026.
+- *Última atualização: 03/09/2026*
+
+---
+
 <!--
 Formato de cada entrada:
 
