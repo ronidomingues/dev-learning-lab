@@ -1,0 +1,16 @@
+{
+  "name": "catalogo-otimista",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Catálogo de produtos com optimistic locking ponta a ponta: coluna de versão no banco, ETag/If-Match no HTTP, retentativa com backoff. Zero dependências.",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/run-tests.js",
+    "demo:perde": "node test/demo-corrida.js inseguro",
+    "demo:protege": "node test/demo-corrida.js seguro"
+  }
+}
