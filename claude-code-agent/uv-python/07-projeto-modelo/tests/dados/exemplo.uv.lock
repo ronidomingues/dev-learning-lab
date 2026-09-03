@@ -1,0 +1,87 @@
+version = 1
+revision = 3
+requires-python = ">=3.10"
+
+[[package]]
+name = "app-exemplo"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "requests" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "requests", specifier = ">=2.31" }]
+
+[[package]]
+name = "certifi"
+version = "2026.7.22"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/certifi.tar.gz", hash = "sha256:0" }
+wheels = [
+    { url = "https://exemplo/certifi.whl", hash = "sha256:1" },
+]
+
+[[package]]
+name = "charset-normalizer"
+version = "3.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/cn.tar.gz", hash = "sha256:2" }
+wheels = [
+    { url = "https://exemplo/cn-cp310.whl", hash = "sha256:3" },
+    { url = "https://exemplo/cn-cp311.whl", hash = "sha256:4" },
+]
+
+[[package]]
+name = "idna"
+version = "3.19"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/idna.tar.gz", hash = "sha256:5" }
+wheels = [
+    { url = "https://exemplo/idna.whl", hash = "sha256:6" },
+]
+
+[[package]]
+name = "legado-sem-wheel"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/legado.tar.gz", hash = "sha256:7" }
+
+[[package]]
+name = "pytest"
+version = "9.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/pytest.tar.gz", hash = "sha256:8" }
+wheels = [
+    { url = "https://exemplo/pytest.whl", hash = "sha256:9" },
+]
+
+[[package]]
+name = "requests"
+version = "2.34.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "charset-normalizer" },
+    { name = "idna" },
+    { name = "urllib3" },
+    { name = "legado-sem-wheel" },
+]
+sdist = { url = "https://exemplo/requests.tar.gz", hash = "sha256:10" }
+wheels = [
+    { url = "https://exemplo/requests.whl", hash = "sha256:11" },
+]
+
+[[package]]
+name = "urllib3"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://exemplo/urllib3.tar.gz", hash = "sha256:12" }
+wheels = [
+    { url = "https://exemplo/urllib3.whl", hash = "sha256:13" },
+]
