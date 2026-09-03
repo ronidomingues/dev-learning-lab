@@ -1,0 +1,59 @@
+# compose.yaml — sobe um PostgreSQL 18 e a aplicação, com um comando.
+# Reaproveita o que está no curso de Docker (../../docker).
+#
+#   docker compose up -d                              → banco + app
+#   docker compose --profile testes run --rm testes   → roda os testes contra o banco
+#
+# Não há campo `version:` — obsoleto na especificação atual do Compose.
+
+name: biblioteca
+
+services:
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: biblioteca
+      POSTGRES_PASSWORD: ${DB_SENHA:?defina DB_SENHA no .env}
+      POSTGRES_DB: biblioteca
+    volumes:
+      - dados-db:/var/lib/postgresql/data
+      # Scripts em /docker-entrypoint-initdb.d/ rodam automaticamente na PRIMEIRA
+      # inicialização do banco (ordem alfabética). É como o schema é aplicado.
+      - ./schema:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biblioteca -d biblioteca"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    # Em desenvolvimento, publicar no loopback permite conectar com psql/DBeaver da sua máquina.
+    ports:
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+
+  app:
+    build: ./app
+    environment:
+      DATABASE_URL: postgres://biblioteca:${DB_SENHA:?}@db:5432/biblioteca
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy   # só sobe quando o banco aceita conexões
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+
+  # Container efêmero que roda a suíte de testes contra o banco do compose.
+  testes:
+    profiles: [testes]
+    build: ./app
+    environment:
+      DATABASE_URL: postgres://biblioteca:${DB_SENHA:?}@db:5432/biblioteca
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["node", "--test"]
+
+volumes:
+  dados-db:
