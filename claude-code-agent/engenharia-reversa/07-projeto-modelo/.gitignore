@@ -1,0 +1,5 @@
+crackme
+crackme_stripped
+crackme_hard
+*.o
+__pycache__/
