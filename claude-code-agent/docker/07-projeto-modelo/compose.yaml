@@ -1,0 +1,115 @@
+# compose.yaml — a stack completa do projeto-modelo.
+#
+# Não há campo `version:` — ele é obsoleto na Compose Specification atual e só gera aviso.
+#
+# Perfis (`profiles`) permitem que um único arquivo sirva a três usos:
+#   docker compose up -d                       → padrão: proxy + api (produção local)
+#   docker compose --profile dev up            → api com recarga automática, sem proxy
+#   docker compose --profile testes run --rm testes → roda a suíte e sai
+
+name: mural
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # proxy — única porta exposta ao mundo. A api NÃO publica porta nenhuma.
+  # ---------------------------------------------------------------------------
+  proxy:
+    image: nginx:1.27-alpine
+    ports:
+      # 127.0.0.1 no lado esquerdo: escuta SÓ no loopback. Sem isso, o serviço fica
+      # visível para toda a rede local — e as regras de iptables que o Docker escreve
+      # passam por cima do ufw, então o firewall do host não te salva.
+      - "127.0.0.1:${PORTA_PUBLICA:-8080}:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy   # só sobe quando a api estiver REALMENTE pronta
+    networks: [borda, interna]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/saude"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # api — a aplicação
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      target: producao
+    image: mural-de-recados:1.0
+    environment:
+      # `:?mensagem` faz o Compose ABORTAR se a variável não estiver definida, em vez de
+      # subir com valor vazio. Falhar aqui é barato; falhar em produção, não.
+      NOME_DO_MURAL: ${NOME_DO_MURAL:?defina NOME_DO_MURAL no arquivo .env}
+      MAX_RECADOS: ${MAX_RECADOS:-500}
+      NODE_ENV: production
+    volumes:
+      - dados-mural:/dados          # volume NOMEADO: os recados sobrevivem ao container
+    networks: [interna]             # não está em `borda`: inalcançável de fora do proxy
+    restart: unless-stopped
+    stop_grace_period: 15s          # tempo para o SIGTERM ser tratado antes do SIGKILL
+    deploy:
+      resources:
+        limits:
+          memory: 256M              # sem limite, um vazamento derruba o host inteiro
+          cpus: "0.5"
+        reservations:
+          memory: 64M
+    security_opt:
+      - no-new-privileges:true      # impede escalada por binário setuid dentro do container
+    read_only: true                 # sistema de arquivos raiz somente leitura...
+    tmpfs:
+      - /tmp:size=16m               # ...com um /tmp em RAM, porque o Node precisa escrever ali
+    cap_drop: [ALL]                 # nenhuma capability: o app só faz bind numa porta > 1024
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"             # sem isso, o log cresce até o disco acabar
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # dev — mesma aplicação, com recarga automática e código vindo do host
+  # ---------------------------------------------------------------------------
+  dev:
+    profiles: [dev]
+    build:
+      context: .
+      target: dev
+    environment:
+      NOME_DO_MURAL: ${NOME_DO_MURAL:-Mural (dev)}
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./app/src:/app/src:ro       # edite no host, veja no container. :ro porque o app não escreve aqui
+      - ./app/test:/app/test:ro
+      - dados-dev:/dados
+    networks: [interna]
+
+  # ---------------------------------------------------------------------------
+  # testes — container efêmero que roda a suíte
+  # ---------------------------------------------------------------------------
+  testes:
+    profiles: [testes]
+    build:
+      context: .
+      target: testes
+    command: ["node", "--test"]
+    volumes:
+      - ./app/src:/app/src:ro
+      - ./app/test:/app/test:ro
+    networks: [interna]
+
+volumes:
+  dados-mural:
+  dados-dev:
+
+networks:
+  borda:
+  interna:
+    internal: true     # esta rede não tem rota de saída para a internet

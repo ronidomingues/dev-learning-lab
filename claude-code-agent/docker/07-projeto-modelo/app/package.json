@@ -1,0 +1,17 @@
+{
+  "name": "mural-de-recados",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Projeto-modelo do curso de Docker: API + página, com persistência em volume.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

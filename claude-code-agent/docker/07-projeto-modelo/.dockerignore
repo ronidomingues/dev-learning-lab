@@ -1,0 +1,56 @@
+# .dockerignore — tão importante quanto o Dockerfile.
+#
+# Tudo que está aqui NÃO é enviado ao daemon como contexto de build. Isso:
+#   1. acelera o build (contexto menor viaja mais rápido);
+#   2. evita invalidar o cache por causa de arquivo irrelevante;
+#   3. impede que segredo entre na imagem por um COPY . . distraído.
+#
+# Regra de ouro: se você não sabe se um arquivo deve entrar na imagem, ele não deve.
+
+# Segredos — o motivo nº 1 deste arquivo existir
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+.npmrc
+.netrc
+
+# Controle de versão e metadados
+.git
+.gitignore
+.github
+.gitattributes
+
+# Dependências e artefatos: são reconstruídos DENTRO da imagem.
+# Copiar node_modules do host quebra pacotes com binário nativo quando o host não é Linux.
+node_modules
+dist
+build
+coverage
+*.tsbuildinfo
+
+# Dados locais — jamais devem ir para dentro da imagem
+dados/
+backups/
+*.sqlite
+*.db
+
+# Ruído
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+
+# Arquivos de infraestrutura: não são usados em tempo de execução da imagem
+Dockerfile*
+.dockerignore
+compose*.yaml
+compose*.yml
+Makefile
+README.md
+docs/
