@@ -1,0 +1,6 @@
+# Dependências do projeto-modelo `sinal`.
+# Versões com as quais foi executado e verificado em 14/08/2026.
+# Os limites inferiores são os mínimos reais; acima disso, deve funcionar.
+numpy>=1.24,<3
+scipy>=1.10
+matplotlib>=3.6   # só para o subcomando `figura`; a análise roda sem ele
