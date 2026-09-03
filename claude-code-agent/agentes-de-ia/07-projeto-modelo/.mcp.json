@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tarefas": {
+      "command": "python3",
+      "args": ["mcp_tarefas.py"]
+    }
+  }
+}
