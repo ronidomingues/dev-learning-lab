@@ -1,0 +1,13 @@
+{
+  "name": "tarefas-com-claude-code",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Projeto-modelo do curso de Claude Code: uma API mínima acompanhada de um repositório inteiramente configurado (CLAUDE.md, regras, hooks, subagente, skills, permissões).",
+  "engines": { "node": ">=20.6.0" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test",
+    "verificar": "node scripts/verificar-configuracao.mjs"
+  }
+}
