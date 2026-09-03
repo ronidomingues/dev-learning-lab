@@ -1,0 +1,6 @@
+# NADA da PKI gerada vai para o repositório: há CHAVES PRIVADAS aqui.
+# Rode ./criar-pki.sh para recriar tudo em segundos.
+pki/*
+!pki/openssl-ca.cnf
+__pycache__/
+*.pyc

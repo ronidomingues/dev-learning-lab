@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Configuração da CA do projeto cofre-tls.
+# Usamos o comando `openssl ca` (e não `openssl x509 -req`) de propósito:
+# `openssl ca` mantém uma BASE DE DADOS de emissão (index.txt) e um contador de
+# número de série. Sem isso não existe revogação — não há como dizer "o
+# certificado nº 3 foi revogado" se você nunca registrou que emitiu o nº 3.
+# É a diferença entre "gerar certificados" e "operar uma autoridade certificadora".
+# ─────────────────────────────────────────────────────────────────────────────
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ./pki
+database          = $dir/index.txt          # a base de emissão
+serial            = $dir/serial             # próximo número de série
+new_certs_dir     = $dir/novos              # cópia de tudo que foi emitido
+certificate       = $dir/ca.crt
+private_key       = $dir/ca.key
+crlnumber         = $dir/crlnumber
+crl               = $dir/ca.crl
+default_md        = sha256
+default_days      = 90
+default_crl_days  = 7                       # a CRL precisa ser reemitida toda semana
+policy            = policy_interna
+email_in_dn       = no
+rand_serial       = no
+unique_subject    = no                      # permite reemitir para o mesmo CN (renovação)
+copy_extensions   = none                    # NUNCA copie extensões do CSR: ver README §Segurança
+
+[ policy_interna ]
+organizationName  = match                   # tem de ser a nossa organização
+commonName        = supplied                # obrigatório
+countryName       = optional
+stateOrProvinceName = optional
+
+[ req ]
+default_bits       = 2048
+distinguished_name = req_dn
+prompt             = no
+string_mask        = utf8only
+
+[ req_dn ]
+O  = Cofre TLS
+CN = Cofre TLS Root CA
+
+# ── Perfis de emissão ────────────────────────────────────────────────────────
+[ v3_ca ]
+basicConstraints       = critical, CA:TRUE, pathlen:0
+keyUsage               = critical, keyCertSign, cRLSign
+subjectKeyIdentifier   = hash
+
+[ v3_servidor ]
+basicConstraints       = critical, CA:FALSE
+keyUsage               = critical, digitalSignature, keyEncipherment
+extendedKeyUsage       = serverAuth
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always
+crlDistributionPoints  = URI:http://localhost:8080/ca.crl
+
+[ v3_cliente ]
+basicConstraints       = critical, CA:FALSE
+keyUsage               = critical, digitalSignature
+extendedKeyUsage       = clientAuth
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always
+crlDistributionPoints  = URI:http://localhost:8080/ca.crl
