@@ -1,0 +1,19 @@
+# Versões verificadas em 11/08/2026 (Python 3.10–3.13).
+# O torch NÃO está fixado num build específico de propósito: escolha o canal
+# certo para a sua máquina ANTES de instalar este arquivo — ver 03-instalacao.md.
+#   CPU:  pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   CUDA: pip install torch --index-url https://download.pytorch.org/whl/cu130
+
+torch>=2.4
+transformers>=5.0,<6
+datasets>=4.0
+scikit-learn>=1.4
+pandas>=2.0
+accelerate>=1.0
+
+# API
+fastapi>=0.115
+uvicorn[standard]>=0.30
+
+# testes
+pytest>=8.0

@@ -1,0 +1,17 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+
+# Artefatos de treino — pesos NÃO vão para o Git.
+# Um checkpoint de BERT-base tem ~440 MB; o Git não lida bem com isso e o
+# histórico incha para sempre. Publique no Hugging Face Hub, num bucket S3/GCS
+# ou num registry de artefatos.
+modelo-treinado/
+checkpoints/
+runs/
+*.pt
+*.safetensors
+
+# Dados sensíveis (o CSV de exemplo deste projeto é sintético e vai para o Git)
+dados/*.real.csv

@@ -1,0 +1,181 @@
+texto,categoria
+"Minha fatura veio com valor errado, cobraram dois meses juntos",FINANCEIRO
+"Não recebi o boleto deste mês, podem reenviar por favor",FINANCEIRO
+"Fui cobrado em duplicidade no cartão de crédito",FINANCEIRO
+"Preciso da segunda via da nota fiscal de julho",FINANCEIRO
+"O pagamento foi feito mas o sistema continua acusando pendência",FINANCEIRO
+"Quero mudar a data de vencimento da minha mensalidade",FINANCEIRO
+"Houve um reajuste que não foi comunicado, quero entender a cobrança",FINANCEIRO
+"O desconto combinado no contrato não apareceu na fatura",FINANCEIRO
+"Como faço para trocar a forma de pagamento para débito automático",FINANCEIRO
+"Recebi uma cobrança de multa que não reconheço",FINANCEIRO
+"Solicito estorno do valor pago em duplicidade na semana passada",FINANCEIRO
+"A nota fiscal saiu com o CNPJ errado, preciso de correção",FINANCEIRO
+"Meu boleto venceu e preciso de um novo com a data atualizada",FINANCEIRO
+"Estão cobrando um serviço adicional que eu nunca contratei",FINANCEIRO
+"Qual o valor total em aberto na minha conta hoje",FINANCEIRO
+"O comprovante de pagamento não foi reconhecido pelo sistema",FINANCEIRO
+"Preciso do relatório de pagamentos dos últimos doze meses",FINANCEIRO
+"Fizeram a cobrança antes da data acordada em contrato",FINANCEIRO
+"Quero parcelar o débito em atraso, é possível",FINANCEIRO
+"O PIX foi feito mas não consta como recebido no portal",FINANCEIRO
+"Não consigo fazer login, a senha não é aceita",TECNICO
+"O sistema está fora do ar desde as oito da manhã",TECNICO
+"A página trava quando tento salvar o formulário",TECNICO
+"Erro 500 ao tentar acessar o relatório mensal",TECNICO
+"O aplicativo fecha sozinho toda vez que abro a aba de pedidos",TECNICO
+"A integração com nosso ERP parou de sincronizar ontem",TECNICO
+"Não consigo emitir nota fiscal, dá erro de certificado",TECNICO
+"O upload de arquivos falha sempre que passa de dez megabytes",TECNICO
+"A busca não retorna nenhum resultado mesmo com dados existentes",TECNICO
+"Estou recebendo timeout na API em todas as requisições",TECNICO
+"O relatório sai com os gráficos em branco no Chrome",TECNICO
+"Depois da atualização os filtros pararam de funcionar",TECNICO
+"O sistema está muito lento, cada tela leva mais de um minuto",TECNICO
+"Não recebo mais os e-mails de notificação da plataforma",TECNICO
+"O token de acesso expira em minutos e me desconecta",TECNICO
+"A impressão do pedido sai com os campos desalinhados",TECNICO
+"Perdi o acesso de administrador depois da migração",TECNICO
+"O webhook não está mais entregando os eventos no nosso endpoint",TECNICO
+"A tela de cadastro não aceita CPF válido, diz que é inválido",TECNICO
+"O backup automático falhou nas últimas três noites",TECNICO
+"Gostaria de saber o preço do plano empresarial",COMERCIAL
+"Quero contratar mais dez licenças para minha equipe",COMERCIAL
+"Vocês têm desconto para pagamento anual antecipado",COMERCIAL
+"Preciso de uma proposta comercial para a diretoria avaliar",COMERCIAL
+"Qual a diferença entre o plano básico e o profissional",COMERCIAL
+"Gostaria de agendar uma demonstração do produto",COMERCIAL
+"Vocês atendem empresas do setor público, com licitação",COMERCIAL
+"Quero fazer upgrade do meu plano ainda neste mês",COMERCIAL
+"Existe período de teste gratuito antes de assinar",COMERCIAL
+"Preciso de um orçamento para cem usuários simultâneos",COMERCIAL
+"Vocês oferecem treinamento para a equipe na contratação",COMERCIAL
+"Qual o prazo de implantação para uma empresa do nosso porte",COMERCIAL
+"Há alguma condição especial para quem indica outro cliente",COMERCIAL
+"Quero contratar o módulo de relatórios avançados",COMERCIAL
+"Vocês têm contrato com SLA de disponibilidade garantida",COMERCIAL
+"Gostaria de falar com um consultor sobre o plano enterprise",COMERCIAL
+"O plano atual permite quantos acessos simultâneos",COMERCIAL
+"Preciso incluir uma nova filial no mesmo contrato",COMERCIAL
+"Quais formas de pagamento vocês aceitam para novos contratos",COMERCIAL
+"Tem alguma promoção para migração de concorrente",COMERCIAL
+"Quero cancelar minha assinatura imediatamente",CANCELAMENTO
+"Como faço para encerrar meu contrato sem multa",CANCELAMENTO
+"Solicito o cancelamento do serviço a partir do próximo mês",CANCELAMENTO
+"Não quero mais usar a plataforma, favor desativar minha conta",CANCELAMENTO
+"Preciso rescindir o contrato por decisão da diretoria",CANCELAMENTO
+"Qual o prazo de aviso prévio para encerrar o plano",CANCELAMENTO
+"Desejo suspender temporariamente o serviço por três meses",CANCELAMENTO
+"Já pedi o cancelamento e continuam me cobrando",CANCELAMENTO
+"Quero encerrar apenas o módulo extra, mantendo o principal",CANCELAMENTO
+"Como faço para excluir permanentemente meus dados da plataforma",CANCELAMENTO
+"A empresa fechou, preciso cancelar tudo e receber os arquivos",CANCELAMENTO
+"Estou insatisfeito e quero finalizar o contrato hoje mesmo",CANCELAMENTO
+"Existe fidelidade no meu plano, quero sair antes do prazo",CANCELAMENTO
+"Desativem meu acesso, não vou renovar no vencimento",CANCELAMENTO
+"Quero reduzir para o plano gratuito e cancelar o pago",CANCELAMENTO
+"Solicito o distrato do contrato assinado em janeiro",CANCELAMENTO
+"Não renovem automaticamente minha assinatura este ano",CANCELAMENTO
+"Encerrei minha operação e preciso finalizar a conta",CANCELAMENTO
+"Cancelei mês passado e o acesso ainda está ativo",CANCELAMENTO
+"Como recupero meus dados antes de cancelar o serviço",CANCELAMENTO
+"A fatura de agosto está com juros indevidos",FINANCEIRO
+"Quero antecipar o pagamento das próximas parcelas",FINANCEIRO
+"O sistema calculou o imposto errado na nota",FINANCEIRO
+"Preciso do informe de rendimentos para o contador",FINANCEIRO
+"A cobrança recorrente falhou no cartão, como regularizo",FINANCEIRO
+"Não consigo anexar documentos, o botão não responde",TECNICO
+"O login com Google parou de funcionar hoje",TECNICO
+"Aparece mensagem de conexão recusada ao abrir o painel",TECNICO
+"Os dados do dashboard estão desatualizados há dois dias",TECNICO
+"A exportação em CSV vem com acentuação quebrada",TECNICO
+"Quero saber se existe versão para grandes volumes de dados",COMERCIAL
+"Podemos negociar o valor para renovação de contrato",COMERCIAL
+"Preciso de nota técnica do produto para participar de pregão",COMERCIAL
+"Vocês têm parceria para revenda do sistema",COMERCIAL
+"Quanto custa adicionar o módulo de integração fiscal",COMERCIAL
+"Quero cancelar o plano e migrar para outro fornecedor",CANCELAMENTO
+"Peço o encerramento imediato por descumprimento de contrato",CANCELAMENTO
+"Como faço para não ser mais cobrado a partir de setembro",CANCELAMENTO
+"Solicito desativação da conta e exclusão do cadastro",CANCELAMENTO
+"Quero interromper o serviço no fim do período contratado",CANCELAMENTO
+"Preciso alterar o titular da cobrança para outro CNPJ",FINANCEIRO
+"O sistema gerou dois boletos para a mesma competência",FINANCEIRO
+"Quero entender a diferença entre o valor do contrato e o cobrado",FINANCEIRO
+"O cartão foi recusado e não sei como pagar a mensalidade",FINANCEIRO
+"Faltou o desconto de fidelidade na fatura deste mês",FINANCEIRO
+"Preciso emitir uma nota de crédito referente à devolução",FINANCEIRO
+"Quando cai o pagamento feito por transferência bancária",FINANCEIRO
+"Cobraram taxa de adesão que já havia sido paga",FINANCEIRO
+"Como consigo o extrato detalhado de consumo do mês",FINANCEIRO
+"Meu financeiro precisa do XML da nota fiscal de junho",FINANCEIRO
+"Houve retenção de imposto errada na nota emitida",FINANCEIRO
+"O valor cobrado não bate com a proposta assinada",FINANCEIRO
+"Solicito prorrogação do vencimento por dez dias",FINANCEIRO
+"Estou com uma pendência antiga e quero negociar",FINANCEIRO
+"O reembolso prometido não caiu na conta até agora",FINANCEIRO
+"Preciso trocar o e-mail que recebe as faturas",FINANCEIRO
+"Fui cobrado depois de já ter quitado tudo",FINANCEIRO
+"Como emito boleto avulso para pagamento antecipado",FINANCEIRO
+"O sistema não aceita meu cartão internacional",FINANCEIRO
+"Quero incluir a inscrição estadual na nota fiscal",FINANCEIRO
+"O botão de salvar fica girando e nunca conclui",TECNICO
+"Recebo erro de permissão negada ao abrir o módulo fiscal",TECNICO
+"A senha de recuperação nunca chega no meu e-mail",TECNICO
+"Aparece tela branca depois que faço login",TECNICO
+"O relatório em PDF sai truncado na segunda página",TECNICO
+"A API retorna código 401 mesmo com a chave correta",TECNICO
+"Os dados que cadastrei ontem sumiram do sistema",TECNICO
+"O agendamento automático parou de disparar",TECNICO
+"O campo de data não aceita o formato brasileiro",TECNICO
+"O aplicativo do celular não sincroniza com o site",TECNICO
+"A importação da planilha falha sem mensagem de erro",TECNICO
+"Estou vendo dados de outro cliente na minha tela",TECNICO
+"O filtro por período retorna resultados errados",TECNICO
+"O sistema derruba minha sessão a cada cinco minutos",TECNICO
+"A tela de pagamento não carrega no navegador Firefox",TECNICO
+"A pesquisa por CNPJ não encontra clientes existentes",TECNICO
+"O envio de e-mail em massa está travando a fila",TECNICO
+"O gráfico de vendas mostra valores negativos absurdos",TECNICO
+"Não consigo cadastrar usuário novo, diz que já existe",TECNICO
+"O certificado digital A1 não é aceito no upload",TECNICO
+"Quanto custa o plano com suporte vinte e quatro horas",COMERCIAL
+"Gostaria de comparar os planos disponíveis para PME",COMERCIAL
+"Vocês emitem contrato com cláusula de confidencialidade",COMERCIAL
+"Preciso de referências de clientes do setor de varejo",COMERCIAL
+"É possível personalizar o sistema com nossa marca",COMERCIAL
+"Qual o custo por usuário adicional no plano atual",COMERCIAL
+"Vocês têm integração pronta com o sistema Totvs",COMERCIAL
+"Quero uma cotação para renovação por três anos",COMERCIAL
+"Existe plano específico para instituições de ensino",COMERCIAL
+"Podem enviar o catálogo completo de funcionalidades",COMERCIAL
+"Preciso saber o limite de armazenamento de cada plano",COMERCIAL
+"Vocês fazem migração dos dados do sistema antigo",COMERCIAL
+"Qual o desconto para pagamento à vista do ano inteiro",COMERCIAL
+"Gostaria de ampliar o contrato para outras filiais",COMERCIAL
+"Tem versão em inglês para nossa matriz no exterior",COMERCIAL
+"Quero contratar horas de consultoria especializada",COMERCIAL
+"O contrato pode ser assinado digitalmente",COMERCIAL
+"Preciso de proposta com validade de trinta dias",COMERCIAL
+"Vocês participam de licitação por pregão eletrônico",COMERCIAL
+"Existe programa de parceria para escritórios contábeis",COMERCIAL
+"Quero encerrar o serviço porque não uso mais",CANCELAMENTO
+"Peço o cancelamento por não atender nossas necessidades",CANCELAMENTO
+"Como faço para desativar a renovação automática",CANCELAMENTO
+"Solicito o término do contrato ao fim da vigência",CANCELAMENTO
+"Quero cancelar duas das cinco licenças contratadas",CANCELAMENTO
+"Preciso encerrar a conta e apagar todos os registros",CANCELAMENTO
+"Se eu cancelar agora, tenho direito a reembolso proporcional",CANCELAMENTO
+"Estamos migrando para outro sistema e vamos encerrar",CANCELAMENTO
+"Desejo cancelar o serviço adicional de backup",CANCELAMENTO
+"Pedi para encerrar por telefone e nada foi feito",CANCELAMENTO
+"Como faço para dar baixa no contrato após a fusão",CANCELAMENTO
+"Quero suspender a conta até segunda ordem",CANCELAMENTO
+"Solicito o cancelamento com efeito imediato por escrito",CANCELAMENTO
+"Meu período de teste acabou e não quero continuar",CANCELAMENTO
+"Preciso rescindir o contrato antes do prazo, qual a multa",CANCELAMENTO
+"Vamos encerrar as atividades e precisamos desativar tudo",CANCELAMENTO
+"Quero interromper a assinatura sem perder o histórico",CANCELAMENTO
+"Peço o desligamento da minha empresa da plataforma",CANCELAMENTO
+"Como cancelo o plano pelo próprio portal do cliente",CANCELAMENTO
+"Não desejo mais o serviço a partir do próximo ciclo",CANCELAMENTO
