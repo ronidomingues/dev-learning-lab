@@ -1,0 +1,24 @@
+/// Caminho da pasta com os CSVs gerados por gerar_dados.py.
+/// TROQUE ESTE VALOR pelo caminho na sua máquina antes de atualizar.
+/// Windows:  "C:\projetos\tintas-aurora\dados\"
+/// Este é o único ponto de configuração do projeto.
+expression PastaDados = "C:\projetos\tintas-aurora\dados\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 1a000000-0000-0000-0000-000000000001
+
+/// Função auxiliar: lê um CSV UTF-8 da PastaDados, com cabeçalho promovido.
+/// Centralizar a leitura evita repetir Csv.Document sete vezes — e evita
+/// que sete consultas divirjam quando o formato mudar.
+expression LerCsv =
+		let
+		    Funcao = (nomeArquivo as text) as table =>
+		        let
+		            Origem = Csv.Document(
+		                File.Contents(PastaDados & nomeArquivo),
+		                [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]
+		            ),
+		            Promovido = Table.PromoteHeaders(Origem, [PromoteAllScalars = true])
+		        in
+		            Promovido
+		in
+		    Funcao
+	lineageTag: 1a000000-0000-0000-0000-000000000002

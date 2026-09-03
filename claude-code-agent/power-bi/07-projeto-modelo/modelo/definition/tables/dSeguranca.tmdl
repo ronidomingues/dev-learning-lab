@@ -1,0 +1,46 @@
+/// Tabela de segurança: mapeia usuário → escopo de visão.
+/// NÃO tem relacionamento com nada. É lida por LOOKUPVALUE dentro da função
+/// de RLS. Fica oculta E é esvaziada pela própria RLS, para que ninguém
+/// descubra a estrutura de acessos consultando o modelo.
+table dSeguranca
+	isHidden
+
+	column Email
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Email
+
+	column SK_Vendedor
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SK_Vendedor
+
+	/// "Vendedor" | "Equipe" | "Tudo"
+	column Escopo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Escopo
+
+	column Equipe
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Equipe
+
+	partition dSeguranca = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("dSeguranca.csv"),
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"Email", type text},
+				            {"SK_Vendedor", Int64.Type},
+				            {"Escopo", type text},
+				            {"Equipe", type text}
+				        },
+				        "en-US"
+				    )
+				in
+				    Tipado

@@ -1,0 +1,53 @@
+/// Dimensão de MÊS — existe por um motivo estrutural, não por capricho.
+///
+/// fVendas é diária; fMetas é mensal. Não dá para relacionar fMetas direto a
+/// dCalendario, porque dCalendario[AnoMes] NÃO é única (tem ~30 linhas por mês)
+/// e o lado "1" de um relacionamento exige unicidade.
+///
+/// A solução canônica de Kimball para fatos de granularidade mista é uma
+/// dimensão compartilhada na granularidade mais grossa:
+///
+///     dMes ──1:*── dCalendario ──1:*── fVendas
+///       └──1:*── fMetas ──*:1── dVendedor
+///
+/// Tabela CALCULADA (DAX), derivada de dCalendario: assim ela nunca sai de
+/// sincronia com o calendário.
+table dMes
+
+	column AnoMes
+		dataType: string
+		isKey
+		summarizeBy: none
+		sourceColumn: [AnoMes]
+
+	column Ano
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: [Ano]
+
+	column NumMes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: [NumMes]
+		isHidden
+
+	column IndiceMes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: [IndiceMes]
+		isHidden
+
+	partition dMes = calculated
+		mode: import
+		source = ```
+				SUMMARIZE(
+				    dCalendario,
+				    dCalendario[AnoMes],
+				    dCalendario[Ano],
+				    dCalendario[NumMes],
+				    dCalendario[IndiceMes]
+				)
+				```

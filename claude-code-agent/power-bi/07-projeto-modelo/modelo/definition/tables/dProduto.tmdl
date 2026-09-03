@@ -1,0 +1,100 @@
+/// Dimensão de produtos. Recebe a linha "(sem cadastro)" via defeito plantado nº 1:
+/// o Power Query acrescenta uma linha com SK_Produto = 999 para que as vendas
+/// órfãs NÃO desapareçam nem virem "Em branco" nos visuais.
+/// Isso é uma decisão de projeto: preferimos um rótulo explícito e feio a um
+/// buraco silencioso.
+table dProduto
+
+	column SK_Produto
+		dataType: int64
+		formatString: 0
+		isKey
+		summarizeBy: none
+		sourceColumn: SK_Produto
+		isHidden
+
+	column Codigo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Codigo
+
+	column Produto
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Produto
+
+	column Categoria
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Categoria
+
+	column Linha
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Linha
+
+	column CustoPadrao
+		dataType: double
+		formatString: \R$ #,0.00;-\R$ #,0.00;\R$ #,0.00
+		summarizeBy: none
+		sourceColumn: CustoPadrao
+
+	column PrecoTabela
+		dataType: double
+		formatString: \R$ #,0.00;-\R$ #,0.00;\R$ #,0.00
+		summarizeBy: none
+		sourceColumn: PrecoTabela
+
+	column Ativo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Ativo
+		isHidden
+
+	/// Coluna calculada: faixa de preço. Exemplo didático de quando coluna
+	/// calculada é a escolha certa — o valor não depende do filtro do visual.
+	column 'Faixa de Preço' = ```
+			SWITCH(
+			    TRUE(),
+			    dProduto[PrecoTabela] < 100,   "01 · até R$ 100",
+			    dProduto[PrecoTabela] < 500,   "02 · R$ 100 a 500",
+			    dProduto[PrecoTabela] < 2000,  "03 · R$ 500 a 2.000",
+			    "04 · acima de R$ 2.000"
+			)
+			```
+		dataType: string
+		summarizeBy: none
+
+	partition dProduto = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("dProduto.csv"),
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"SK_Produto", Int64.Type},
+				            {"Codigo", type text},
+				            {"Produto", type text},
+				            {"Categoria", type text},
+				            {"Linha", type text},
+				            {"CustoPadrao", type number},
+				            {"PrecoTabela", type number},
+				            {"Ativo", type text}
+				        },
+				        "en-US"
+				    ),
+				    // DEFEITO 1 — linha "inferida" para as vendas órfãs.
+				    // Padrão de data warehouse: membro desconhecido explícito.
+				    Desconhecido = #table(
+				        type table [
+				            SK_Produto = Int64.Type, Codigo = text, Produto = text,
+				            Categoria = text, Linha = text,
+				            CustoPadrao = number, PrecoTabela = number, Ativo = text
+				        ],
+				        {{999, "(sem cadastro)", "(produto sem cadastro)",
+				          "(sem categoria)", "(sem linha)", 0, 0, "Não"}}
+				    ),
+				    Final = Table.Combine({Tipado, Desconhecido})
+				in
+				    Final

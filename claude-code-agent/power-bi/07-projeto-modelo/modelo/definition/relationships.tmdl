@@ -1,0 +1,72 @@
+/// Relacionamentos do modelo.
+///
+/// Princípios seguidos aqui, e o porquê de cada um:
+///
+/// 1. TODAS as relações são 1:* (um lado dimensão, um lado fato).
+///    Nenhuma é muitos-para-muitos. Se você precisou de *:*, quase sempre
+///    faltou uma dimensão.
+///
+/// 2. TODAS têm direção de filtro ÚNICA (single), da dimensão para o fato.
+///    Filtro bidirecional é a causa nº 1 de ambiguidade e de números
+///    inexplicáveis. Quando for mesmo necessário, use CROSSFILTER na medida
+///    — decisão local, visível, reversível.
+///
+/// 3. A relação com DataEntrega existe mas está INATIVA.
+///    Ativá-la com USERELATIONSHIP dentro de um CALCULATE é como se atende
+///    "dimensão que faz dois papéis" (role-playing dimension) sem duplicar
+///    o calendário.
+
+relationship dCalendario_fVendas
+	fromColumn: fVendas.Data
+	toColumn: dCalendario.Data
+	crossFilteringBehavior: oneDirection
+
+/// Relação secundária: análise por data de ENTREGA.
+/// Inativa por definição — só um caminho pode estar ativo entre duas tabelas.
+relationship dCalendario_fVendas_Entrega
+	isActive: false
+	fromColumn: fVendas.DataEntrega
+	toColumn: dCalendario.Data
+	crossFilteringBehavior: oneDirection
+
+relationship dProduto_fVendas
+	fromColumn: fVendas.SK_Produto
+	toColumn: dProduto.SK_Produto
+	crossFilteringBehavior: oneDirection
+
+relationship dCliente_fVendas
+	fromColumn: fVendas.SK_Cliente
+	toColumn: dCliente.SK_Cliente
+	crossFilteringBehavior: oneDirection
+
+relationship dVendedor_fVendas
+	fromColumn: fVendas.SK_Vendedor
+	toColumn: dVendedor.SK_Vendedor
+	crossFilteringBehavior: oneDirection
+
+/// A ponte de granularidade: dMes é a dimensão compartilhada entre o fato
+/// diário (via dCalendario) e o fato mensal (fMetas).
+///
+/// ESTA É A ÚNICA RELAÇÃO BIDIRECIONAL DO MODELO, e a exceção é deliberada:
+/// sem ela, filtrar um ano em dCalendario NÃO chegaria a fMetas (o filtro só
+/// desce da dimensão para o fato). Como dMes é uma ponte dimensão-dimensão
+/// com caminho único, não há ambiguidade — que é o risco real do
+/// bidirecional. Toda exceção a uma regra de projeto deve vir com a
+/// justificativa escrita ao lado, como esta.
+///
+/// CAVEAT que precisa estar no relatório: ao filtrar UM DIA, a meta exibida
+/// é a do MÊS INTEIRO. Para comparação justa use [Meta Proporcional].
+relationship dMes_dCalendario
+	fromColumn: dCalendario.AnoMes
+	toColumn: dMes.AnoMes
+	crossFilteringBehavior: bothDirections
+
+relationship dMes_fMetas
+	fromColumn: fMetas.AnoMes
+	toColumn: dMes.AnoMes
+	crossFilteringBehavior: oneDirection
+
+relationship dVendedor_fMetas
+	fromColumn: fMetas.SK_Vendedor
+	toColumn: dVendedor.SK_Vendedor
+	crossFilteringBehavior: oneDirection

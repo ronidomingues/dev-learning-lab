@@ -1,0 +1,219 @@
+/// Tabela de FATO: um item de nota fiscal por linha.
+/// Granularidade: NF + ItemNF. Declare a granularidade sempre — é a primeira
+/// pergunta que se faz a um fato, e a que mais gente erra.
+///
+/// Estratégia adotada para os defeitos: NÃO apagar linhas ruins.
+/// Apagar esconde o problema; a origem continua errada e ninguém corrige.
+/// Aqui cada linha ganha colunas AJUSTADAS (usadas nas medidas) e uma coluna
+/// de MOTIVO (usada na página de auditoria). O relatório mostra os dois mundos.
+table fVendas
+
+	column NF
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: NF
+
+	column ItemNF
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ItemNF
+		isHidden
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: Data
+		isHidden
+
+	column DataEntrega
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: DataEntrega
+		isHidden
+
+	column SK_Produto
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SK_Produto
+		isHidden
+
+	column SK_Cliente
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SK_Cliente
+		isHidden
+
+	column SK_Vendedor
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SK_Vendedor
+		isHidden
+
+	/// Quantidade CRUA, como veio da origem. Só para auditoria.
+	column Quantidade
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: Quantidade
+		isHidden
+
+	/// Quantidade com o sinal corrigido: devolução é sempre negativa.
+	column QuantidadeAjustada
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: QuantidadeAjustada
+
+	column PrecoUnitario
+		dataType: double
+		formatString: \R$ #,0.00;-\R$ #,0.00;\R$ #,0.00
+		summarizeBy: none
+		sourceColumn: PrecoUnitario
+
+	/// Desconto CRU. Pode vir > 1 quando alguém digitou "15" em vez de "0,15".
+	column Desconto
+		dataType: double
+		formatString: 0.0000
+		summarizeBy: none
+		sourceColumn: Desconto
+		isHidden
+
+	column DescontoAjustado
+		dataType: double
+		formatString: 0.00%;-0.00%;0.00%
+		summarizeBy: none
+		sourceColumn: DescontoAjustado
+
+	column CustoUnitario
+		dataType: double
+		formatString: \R$ #,0.00;-\R$ #,0.00;\R$ #,0.00
+		summarizeBy: none
+		sourceColumn: CustoUnitario
+
+	/// "Venda" | "Devolucao"
+	column Tipo
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Tipo
+
+	/// Vazio quando a linha está limpa; senão, descreve o problema.
+	/// É esta coluna que alimenta a página de auditoria.
+	column MotivoSuspeita
+		dataType: string
+		summarizeBy: none
+		sourceColumn: MotivoSuspeita
+
+	column LinhaConfiavel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: LinhaConfiavel
+
+	/// Coluna calculada didática: prazo de entrega em dias.
+	/// Aqui coluna calculada é adequada — o valor é atributo da linha e não
+	/// muda com o filtro do visual.
+	column 'Prazo Entrega (dias)' = ```
+			IF(
+			    NOT ISBLANK( fVendas[DataEntrega] ) && fVendas[LinhaConfiavel] = "Sim",
+			    DATEDIFF( fVendas[Data], fVendas[DataEntrega], DAY )
+			)
+			```
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+
+	partition fVendas = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("fVendas.csv"),
+
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"NF", Int64.Type},
+				            {"ItemNF", Int64.Type},
+				            {"SK_Produto", Int64.Type},
+				            {"SK_Cliente", Int64.Type},
+				            {"SK_Vendedor", Int64.Type},
+				            {"Quantidade", Int64.Type},
+				            {"PrecoUnitario", type number},
+				            {"Desconto", type number},
+				            {"CustoUnitario", type number},
+				            {"Tipo", type text}
+				        },
+				        "en-US"
+				    ),
+
+				    // Datas em ISO (aaaa-mm-dd): localidade en-US declarada de
+				    // propósito. NUNCA deixe a conversão de data ao acaso.
+				    ComDatas = Table.TransformColumnTypes(
+				        Tipado,
+				        {{"Data", type date}, {"DataEntrega", type date}},
+				        "en-US"
+				    ),
+
+				    // DEFEITO 3 — devolução com quantidade positiva.
+				    Qtd = Table.AddColumn(
+				        ComDatas,
+				        "QuantidadeAjustada",
+				        each if [Tipo] = "Devolucao" then -Number.Abs([Quantidade])
+				             else [Quantidade],
+				        Int64.Type
+				    ),
+
+				    // DEFEITO 5 — desconto digitado em pontos percentuais.
+				    Desc = Table.AddColumn(
+				        Qtd,
+				        "DescontoAjustado",
+				        each if [Desconto] > 1 then [Desconto] / 100 else [Desconto],
+				        type number
+				    ),
+
+				    // DEFEITOS 4 e 6 — data com século errado e preço zero.
+				    // Não removemos: marcamos.
+				    Motivo = Table.AddColumn(
+				        Desc,
+				        "MotivoSuspeita",
+				        each Text.Combine(
+				            List.RemoveNulls({
+				                if Date.Year([Data]) > 2100 then "data fora do calendário" else null,
+				                if [PrecoUnitario] = 0 then "preço unitário zero" else null,
+				                if [Desconto] > 1 then "desconto fora de escala" else null,
+				                if [Tipo] = "Devolucao" and [Quantidade] > 0
+				                    then "devolução com quantidade positiva" else null,
+				                if [SK_Produto] = 999 then "produto sem cadastro" else null
+				            }),
+				            " | "
+				        ),
+				        type text
+				    ),
+
+				    // Só as linhas com data válida entram nos números oficiais.
+				    // Manter a coluna torna a decisão VISÍVEL no relatório.
+				    Confiavel = Table.AddColumn(
+				        Motivo,
+				        "LinhaConfiavel",
+				        each if Date.Year([Data]) > 2100 then "Não" else "Sim",
+				        type text
+				    ),
+
+				    Final = Table.SelectColumns(
+				        Confiavel,
+				        {
+				            "NF", "ItemNF", "Data", "DataEntrega",
+				            "SK_Produto", "SK_Cliente", "SK_Vendedor",
+				            "Quantidade", "QuantidadeAjustada",
+				            "PrecoUnitario", "Desconto", "DescontoAjustado",
+				            "CustoUnitario", "Tipo",
+				            "MotivoSuspeita", "LinhaConfiavel"
+				        }
+				    )
+				in
+				    Final

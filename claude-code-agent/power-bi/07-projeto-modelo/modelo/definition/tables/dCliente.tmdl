@@ -1,0 +1,108 @@
+/// Dimensão de clientes.
+/// Trata dois defeitos plantados:
+///   nº 2 — o mesmo CNPJ aparece com duas SK (recadastro por mudança de razão
+///          social). NÃO removemos a linha duplicada, porque isso deixaria
+///          vendas órfãs. Em vez disso, o CNPJ é a chave de negócio e
+///          DISTINCTCOUNT deve ser feito sobre ele, nunca sobre SK_Cliente.
+///   nº 8 — UF com caixa e espaços inconsistentes ("sp", " SP", "SP ").
+///          Normalizada no Power Query, e a coluna crua é preservada para
+///          auditoria.
+table dCliente
+
+	column SK_Cliente
+		dataType: int64
+		formatString: 0
+		isKey
+		summarizeBy: none
+		sourceColumn: SK_Cliente
+		isHidden
+
+	/// Chave de NEGÓCIO. É esta que identifica um cliente de verdade.
+	column CNPJ
+		dataType: string
+		summarizeBy: none
+		sourceColumn: CNPJ
+
+	column Cliente
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Cliente
+
+	column Segmento
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Segmento
+
+	column Porte
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Porte
+
+	/// UF crua, como veio do cadastro. Mantida só para a página de auditoria.
+	column UF_Original
+		dataType: string
+		summarizeBy: none
+		sourceColumn: UF
+		isHidden
+
+	column UF
+		dataType: string
+		summarizeBy: none
+		sourceColumn: UF_Normalizada
+		dataCategory: StateOrProvince
+
+	column Regiao
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Regiao
+
+	column Cidade
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Cidade
+		dataCategory: City
+
+	/// Marca as SK que compartilham CNPJ com outra SK. Alimenta a página de
+	/// auditoria: "clientes recadastrados que precisam ser unificados no ERP".
+	column 'Duplicado por CNPJ' = ```
+			VAR qtd =
+			    CALCULATE(
+			        COUNTROWS( dCliente ),
+			        ALLEXCEPT( dCliente, dCliente[CNPJ] )
+			    )
+			RETURN
+			    IF( qtd > 1, "Sim", "Não" )
+			```
+		dataType: string
+		summarizeBy: none
+
+	partition dCliente = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("dCliente.csv"),
+				    // DEFEITO 8 — normalização da UF.
+				    // Text.Trim tira espaços; Text.Upper resolve a caixa.
+				    Normalizada = Table.AddColumn(
+				        Origem,
+				        "UF_Normalizada",
+				        each Text.Upper(Text.Trim([UF])),
+				        type text
+				    ),
+				    Tipado = Table.TransformColumnTypes(
+				        Normalizada,
+				        {
+				            {"SK_Cliente", Int64.Type},
+				            {"CNPJ", type text},
+				            {"Cliente", type text},
+				            {"Segmento", type text},
+				            {"Porte", type text},
+				            {"UF", type text},
+				            {"UF_Normalizada", type text},
+				            {"Regiao", type text},
+				            {"Cidade", type text}
+				        },
+				        "en-US"
+				    )
+				in
+				    Tipado

@@ -1,0 +1,51 @@
+/// Função de segurança por linha (RLS).
+///
+/// Três escopos, resolvidos por consulta à tabela dSeguranca:
+///   · "Vendedor" — vê só as próprias vendas
+///   · "Equipe"   — vê a equipe inteira
+///   · "Tudo"     — vê tudo (diretoria)
+///   · sem cadastro em dSeguranca — não vê NADA (falha fechada, nunca aberta)
+///
+/// DECISÕES DE PROJETO
+///
+/// 1. O filtro é aplicado em dVendedor (DIMENSÃO), não em fVendas (FATO).
+///    12 linhas avaliadas por consulta em vez de 60 mil.
+///
+/// 2. dSeguranca também é filtrada, para que ninguém consiga ler a política
+///    de acesso da empresa consultando o modelo pelo Excel ou por XMLA.
+///    Ocultar uma tabela NÃO a protege — só a esconde da interface.
+///
+/// 3. Falha fechada: quem não está em dSeguranca recebe FALSE(), ou seja,
+///    nenhuma linha. O contrário (ver tudo por omissão) é como vazamentos
+///    acontecem.
+///
+/// LIMITES QUE PRECISAM ESTAR ESCRITOS
+///   · RLS não protege o arquivo .pbix. Quem tem o arquivo tem os dados.
+///   · RLS não se aplica a quem é Admin/Membro/Colaborador do workspace.
+///     Um usuário restrito colocado como "Membro" anula toda esta função.
+///   · Medidas de "% do total geral" revelam agregados por inferência.
+///     Segurança por linha não é segurança contra canal lateral.
+///
+/// TESTE ANTES DE PUBLICAR: Modelagem > Exibir como > marque a função e
+/// informe um e-mail em "Outro usuário".
+role VendasRestritas
+	modelPermission: read
+
+	tablePermission dVendedor =
+			VAR UsuarioAtual = USERPRINCIPALNAME()
+			VAR Escopo =
+			    LOOKUPVALUE( dSeguranca[Escopo], dSeguranca[Email], UsuarioAtual )
+			VAR SKUsuario =
+			    LOOKUPVALUE( dSeguranca[SK_Vendedor], dSeguranca[Email], UsuarioAtual )
+			VAR EquipeUsuario =
+			    LOOKUPVALUE( dSeguranca[Equipe], dSeguranca[Email], UsuarioAtual )
+			RETURN
+			    SWITCH(
+			        Escopo,
+			        "Tudo",     TRUE(),
+			        "Vendedor", dVendedor[SK_Vendedor] = SKUsuario,
+			        "Equipe",   dVendedor[Equipe] = EquipeUsuario,
+			        FALSE()
+			    )
+
+	tablePermission dSeguranca = dSeguranca[Email] = USERPRINCIPALNAME()

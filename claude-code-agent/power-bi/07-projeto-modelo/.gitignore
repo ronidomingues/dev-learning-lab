@@ -1,0 +1,16 @@
+# Os CSVs são GERADOS por gerar_dados.py, de forma determinística
+# (mesma semente → mesmos bytes). Não versionamos ~4 MB de dado derivado.
+dados/
+
+# Artefatos do Power BI Desktop
+*.pbix
+*.pbit
+.pbi/
+**/.pbi/localSettings.json
+**/*.abf
+
+# Sistema
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

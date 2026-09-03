@@ -1,0 +1,53 @@
+/// Dimensão de vendedores. É nela que a segurança por linha (RLS) é aplicada:
+/// filtramos a DIMENSÃO, nunca o fato — menos linhas para avaliar por consulta
+/// e muito mais fácil de auditar.
+table dVendedor
+
+	column SK_Vendedor
+		dataType: int64
+		formatString: 0
+		isKey
+		summarizeBy: none
+		sourceColumn: SK_Vendedor
+		isHidden
+
+	column Vendedor
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Vendedor
+
+	column Equipe
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Equipe
+
+	column UFBase
+		dataType: string
+		summarizeBy: none
+		sourceColumn: UFBase
+
+	/// Usada por USERPRINCIPALNAME() na função de RLS.
+	column Email
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Email
+		isHidden
+
+	partition dVendedor = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("dVendedor.csv"),
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"SK_Vendedor", Int64.Type},
+				            {"Vendedor", type text},
+				            {"Equipe", type text},
+				            {"UFBase", type text},
+				            {"Email", type text}
+				        },
+				        "en-US"
+				    )
+				in
+				    Tipado

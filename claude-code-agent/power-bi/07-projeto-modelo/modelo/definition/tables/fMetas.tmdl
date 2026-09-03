@@ -1,0 +1,45 @@
+/// Tabela de FATO nº 2. Granularidade: mês + vendedor.
+/// Diferente de fVendas (dia + item de NF) — é justamente esse descompasso
+/// que ensina o padrão de dimensões compartilhadas.
+///
+/// Defeito plantado nº 7: existem pares mês/vendedor SEM meta. Não inventamos
+/// meta nenhuma; a medida [Atingimento %] devolve BLANK e a página de auditoria
+/// lista os buracos. Preencher com zero seria pior: 0 vira divisão por zero,
+/// e preencher com a média seria fabricar dado.
+table fMetas
+
+	column AnoMes
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AnoMes
+		isHidden
+
+	column SK_Vendedor
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SK_Vendedor
+		isHidden
+
+	column MetaValor
+		dataType: double
+		formatString: \R$ #,0.00;-\R$ #,0.00;\R$ #,0.00
+		summarizeBy: sum
+		sourceColumn: MetaValor
+
+	partition fMetas = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("fMetas.csv"),
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"AnoMes", type text},
+				            {"SK_Vendedor", Int64.Type},
+				            {"MetaValor", type number}
+				        },
+				        "en-US"
+				    )
+				in
+				    Tipado

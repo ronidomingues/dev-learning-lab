@@ -1,0 +1,125 @@
+/// Dimensão de datas. Contínua, cobrindo anos civis inteiros.
+/// Marcada como tabela de data (dataCategory: Time + isKey na coluna Data),
+/// o que é PRÉ-REQUISITO das funções de inteligência de tempo.
+table dCalendario
+	dataCategory: Time
+
+	column Data
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		isKey
+		summarizeBy: none
+		sourceColumn: Data
+
+	column Ano
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Ano
+
+	column NumMes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: NumMes
+		isHidden
+
+	/// Nome curto do mês. Ordenado por NumMes — sem isso o eixo sai em
+	/// ordem alfabética (abr, ago, dez, fev...), erro clássico.
+	column Mes
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Mes
+		sortByColumn: NumMes
+
+	column AnoMes
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AnoMes
+
+	column Trimestre
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Trimestre
+
+	column AnoTrimestre
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AnoTrimestre
+
+	column Dia
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Dia
+		isHidden
+
+	column DiaSemana
+		dataType: string
+		summarizeBy: none
+		sourceColumn: DiaSemana
+		sortByColumn: NumDiaSemana
+
+	column NumDiaSemana
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: NumDiaSemana
+		isHidden
+
+	column DiaUtil
+		dataType: string
+		summarizeBy: none
+		sourceColumn: DiaUtil
+
+	column DiaDoAno
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DiaDoAno
+		isHidden
+
+	/// Índice contínuo de mês (0, 1, 2, ...). Permite deslocar períodos com
+	/// aritmética simples, sem depender de inteligência de tempo — é o que
+	/// salva quando o calendário é fiscal ou 4-4-5.
+	column IndiceMes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: IndiceMes
+		isHidden
+
+	hierarchy 'Calendário'
+		level Ano
+			column: Ano
+		level Trimestre
+			column: Trimestre
+		level Mes
+			column: Mes
+
+	partition dCalendario = m
+		mode: import
+		source =
+				let
+				    Origem = LerCsv("dCalendario.csv"),
+				    Tipado = Table.TransformColumnTypes(
+				        Origem,
+				        {
+				            {"Data", type date},
+				            {"Ano", Int64.Type},
+				            {"NumMes", Int64.Type},
+				            {"Mes", type text},
+				            {"AnoMes", type text},
+				            {"Trimestre", type text},
+				            {"AnoTrimestre", type text},
+				            {"Dia", Int64.Type},
+				            {"DiaSemana", type text},
+				            {"NumDiaSemana", Int64.Type},
+				            {"DiaUtil", type text},
+				            {"DiaDoAno", Int64.Type},
+				            {"IndiceMes", Int64.Type}
+				        },
+				        "en-US"
+				    )
+				in
+				    Tipado

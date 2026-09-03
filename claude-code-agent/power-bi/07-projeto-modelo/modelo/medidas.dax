@@ -1,0 +1,423 @@
+// ============================================================================
+// medidas.dax — Tintas Aurora
+// ============================================================================
+//
+// COMO USAR
+//   Opção A (recomendada) — Tabular Editor 2:
+//       Ferramentas Externas > Tabular Editor > Advanced Scripting,
+//       ou cole cada medida manualmente na tabela "_Medidas".
+//   Opção B — Power BI Desktop:
+//       Exibição de Consulta DAX > cole o bloco DEFINE MEASURE abaixo >
+//       "Atualizar modelo com alterações".
+//   Opção C — na mão: clique com o botão direito em "_Medidas" > Nova medida,
+//       e cole uma de cada vez (é chato, mas ensina).
+//
+// CONVENÇÕES
+//   · Todas as medidas ficam numa tabela vazia chamada "_Medidas"
+//     (Página Inicial > Inserir dados > tabela sem colunas úteis).
+//     Motivo: separa o QUE se calcula de ONDE o dado mora.
+//   · Comentários /// viram DESCRIÇÃO da medida no modelo (recurso de 2026).
+//   · Pastas de exibição entre colchetes no comentário de cada bloco.
+//
+// GABARITO: rode `python3 validar.py` — a seção 5 traz os números que estas
+// medidas devem reproduzir. Se não bater, o erro é seu (ou meu), não do acaso.
+// ============================================================================
+
+
+// ----------------------------------------------------------------------------
+// 1 · BASE  [pasta: 01 Base]
+// ----------------------------------------------------------------------------
+
+/// Faturamento bruto: quantidade × preço, antes de descontos.
+/// Usa QuantidadeAjustada (devolução negativa) e ignora linhas com data inválida.
+Faturamento Bruto =
+CALCULATE(
+    SUMX(
+        fVendas,
+        fVendas[QuantidadeAjustada] * fVendas[PrecoUnitario]
+    ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Valor total concedido em descontos comerciais.
+Descontos Concedidos =
+CALCULATE(
+    SUMX(
+        fVendas,
+        fVendas[QuantidadeAjustada] * fVendas[PrecoUnitario] * fVendas[DescontoAjustado]
+    ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Faturamento líquido = bruto - descontos. É O NÚMERO OFICIAL da empresa.
+/// Definição acordada com o Comercial em 14/08/2026: não deduz frete nem impostos.
+Faturamento Líquido = [Faturamento Bruto] - [Descontos Concedidos]
+
+/// Custo das mercadorias vendidas, a custo real de aquisição (não o padrão).
+Custo Total =
+CALCULATE(
+    SUMX(
+        fVendas,
+        fVendas[QuantidadeAjustada] * fVendas[CustoUnitario]
+    ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Margem bruta em reais.
+Margem Bruta = [Faturamento Líquido] - [Custo Total]
+
+/// Margem bruta percentual. DIVIDE trata a divisão por zero.
+Margem % = DIVIDE( [Margem Bruta], [Faturamento Líquido] )
+
+/// Desconto médio ponderado pelo valor (não é a média dos descontos!).
+Desconto Médio % = DIVIDE( [Descontos Concedidos], [Faturamento Bruto] )
+
+/// Quantidade líquida vendida (devoluções subtraem).
+Quantidade Vendida =
+CALCULATE(
+    SUM( fVendas[QuantidadeAjustada] ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Notas fiscais distintas no contexto.
+Notas Fiscais =
+CALCULATE(
+    DISTINCTCOUNT( fVendas[NF] ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Valor médio por nota fiscal.
+Ticket Médio = DIVIDE( [Faturamento Líquido], [Notas Fiscais] )
+
+/// Clientes atendidos. Conta CNPJ, não SK_Cliente — o mesmo CNPJ pode ter
+/// duas SK por recadastro (defeito nº 2). Contar SK infla o número.
+Clientes Ativos =
+CALCULATE(
+    DISTINCTCOUNT( dCliente[CNPJ] ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// O número ERRADO, de propósito. Sirva-o lado a lado com [Clientes Ativos]
+/// numa página de auditoria para mostrar o efeito do cadastro duplicado.
+Clientes Ativos (contando SK) =
+CALCULATE(
+    DISTINCTCOUNT( fVendas[SK_Cliente] ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+
+// ----------------------------------------------------------------------------
+// 2 · DEVOLUÇÕES  [pasta: 02 Devoluções]
+// ----------------------------------------------------------------------------
+
+/// Valor devolvido, sempre positivo (mais fácil de ler em gráfico).
+Devoluções =
+ABS(
+    CALCULATE(
+        [Faturamento Líquido],
+        KEEPFILTERS( fVendas[Tipo] = "Devolucao" )
+    )
+)
+
+/// Faturamento sem considerar devoluções — base para o percentual.
+Vendas Brutas (sem devolução) =
+CALCULATE(
+    [Faturamento Líquido],
+    KEEPFILTERS( fVendas[Tipo] = "Venda" )
+)
+
+/// Taxa de devolução sobre vendas. Indicador de qualidade e de erro comercial.
+Taxa de Devolução % =
+DIVIDE( [Devoluções], [Vendas Brutas (sem devolução)] )
+
+
+// ----------------------------------------------------------------------------
+// 3 · TEMPO  [pasta: 03 Tempo]
+// ----------------------------------------------------------------------------
+
+/// Mesmo período do ano anterior.
+Faturamento AA =
+CALCULATE( [Faturamento Líquido], SAMEPERIODLASTYEAR( dCalendario[Data] ) )
+
+/// Variação absoluta contra o ano anterior. Em branco quando não há base
+/// de comparação — evita o falso "crescimento de 100%" no primeiro ano.
+Δ vs AA =
+VAR Atual    = [Faturamento Líquido]
+VAR Anterior = [Faturamento AA]
+RETURN
+    IF( NOT ISBLANK( Atual ) && NOT ISBLANK( Anterior ), Atual - Anterior )
+
+/// Variação percentual contra o ano anterior.
+Δ % vs AA =
+VAR Atual    = [Faturamento Líquido]
+VAR Anterior = [Faturamento AA]
+RETURN
+    IF(
+        NOT ISBLANK( Atual ) && NOT ISBLANK( Anterior ) && Anterior <> 0,
+        DIVIDE( Atual - Anterior, Anterior )
+    )
+
+/// Acumulado no ano civil.
+Faturamento YTD =
+CALCULATE( [Faturamento Líquido], DATESYTD( dCalendario[Data] ) )
+
+/// Acumulado no ano civil, ano anterior — para comparar YTD com YTD.
+Faturamento YTD AA =
+CALCULATE(
+    [Faturamento Líquido],
+    DATESYTD( SAMEPERIODLASTYEAR( dCalendario[Data] ) )
+)
+
+/// Acumulado móvel de 12 meses (MAT). Elimina sazonalidade da leitura.
+Faturamento MAT =
+CALCULATE(
+    [Faturamento Líquido],
+    DATESINPERIOD( dCalendario[Data], MAX( dCalendario[Data] ), -12, MONTH )
+)
+
+/// Média móvel de 3 meses, dividindo pelos meses efetivamente presentes.
+Média Móvel 3M =
+VAR Janela = DATESINPERIOD( dCalendario[Data], MAX( dCalendario[Data] ), -3, MONTH )
+VAR N = CALCULATE( DISTINCTCOUNT( dCalendario[AnoMes] ), Janela )
+RETURN
+    DIVIDE( CALCULATE( [Faturamento Líquido], Janela ), N )
+
+/// Faturamento apenas de meses FECHADOS. Evita o mergulho falso do mês corrente,
+/// que gera pânico em reunião de diretoria todo dia 3.
+Faturamento (meses fechados) =
+VAR UltimoDiaFechado = EOMONTH( MAX( dCalendario[Data] ), -1 )
+RETURN
+    CALCULATE(
+        [Faturamento Líquido],
+        KEEPFILTERS( dCalendario[Data] <= UltimoDiaFechado )
+    )
+
+
+// ----------------------------------------------------------------------------
+// 4 · METAS  [pasta: 04 Metas]
+// ----------------------------------------------------------------------------
+
+/// Meta do período, vinda de fMetas (granularidade mês + vendedor).
+Meta = SUM( fMetas[MetaValor] )
+
+/// Meta ajustada aos dias do calendário que estão no contexto.
+/// Necessária porque fMetas é mensal e fVendas é diário: sem isso, comparar
+/// "meta do mês" com "vendas até o dia 10" é desonesto.
+Meta Proporcional =
+VAR DiasNoContexto = COUNTROWS( dCalendario )
+VAR DiasNosMeses =
+    CALCULATE(
+        COUNTROWS( dCalendario ),
+        REMOVEFILTERS( dCalendario ),
+        VALUES( dMes[AnoMes] )
+    )
+RETURN
+    [Meta] * DIVIDE( DiasNoContexto, DiasNosMeses )
+
+/// Percentual de atingimento da meta.
+Atingimento % = DIVIDE( [Faturamento Líquido], [Meta] )
+
+/// Atingimento contra a meta proporcional ao período decorrido.
+Atingimento Proporcional % = DIVIDE( [Faturamento Líquido], [Meta Proporcional] )
+
+/// Diferença em reais entre realizado e meta.
+Gap para Meta = [Faturamento Líquido] - [Meta]
+
+/// Aviso explícito quando não existe meta na granularidade pedida.
+/// Um número ausente com explicação vale mais que um número errado sem aviso.
+Status da Meta =
+SWITCH(
+    TRUE(),
+    ISINSCOPE( dProduto[Produto] ) || ISINSCOPE( dCliente[Cliente] ),
+        "sem meta nesta granularidade",
+    ISBLANK( [Meta] ) && NOT ISBLANK( [Faturamento Líquido] ),
+        "meta não cadastrada",
+    ISBLANK( [Meta] ),
+        BLANK(),
+    FORMAT( [Atingimento %], "0.0%" )
+)
+
+
+// ----------------------------------------------------------------------------
+// 5 · RANKING E CONCENTRAÇÃO  [pasta: 05 Ranking]
+// ----------------------------------------------------------------------------
+
+/// Posição do item no contexto visível, por faturamento.
+Ranking =
+IF(
+    NOT ISBLANK( [Faturamento Líquido] ),
+    RANKX(
+        ALLSELECTED( dProduto[Produto] ),
+        [Faturamento Líquido],
+        ,
+        DESC,
+        DENSE
+    )
+)
+
+/// Participação sobre o total VISÍVEL (respeita as segmentações do usuário).
+% do Total Visível =
+DIVIDE(
+    [Faturamento Líquido],
+    CALCULATE( [Faturamento Líquido], ALLSELECTED() )
+)
+
+/// Participação sobre o total geral (ignora TODOS os filtros).
+/// Sirva junto com a de cima para mostrar que "% do total" é ambíguo.
+% do Total Geral =
+DIVIDE(
+    [Faturamento Líquido],
+    CALCULATE( [Faturamento Líquido], REMOVEFILTERS() )
+)
+
+/// Faturamento acumulado da curva de Pareto, por produto.
+Acumulado Pareto =
+VAR Base =
+    ADDCOLUMNS( ALLSELECTED( dProduto[Produto] ), "@Fat", [Faturamento Líquido] )
+VAR Atual = [Faturamento Líquido]
+RETURN
+    IF(
+        NOT ISBLANK( Atual ),
+        SUMX( FILTER( Base, [@Fat] >= Atual ), [@Fat] )
+    )
+
+/// Posição relativa na curva de Pareto (0 a 1).
+% Acumulado Pareto =
+DIVIDE(
+    [Acumulado Pareto],
+    CALCULATE( [Faturamento Líquido], ALLSELECTED( dProduto[Produto] ) )
+)
+
+/// Classe ABC recalculada conforme os filtros do usuário.
+Classe ABC =
+VAR a = [% Acumulado Pareto]
+RETURN
+    SWITCH(
+        TRUE(),
+        ISBLANK( a ), BLANK(),
+        a <= 0.80, "A",
+        a <= 0.95, "B",
+        "C"
+    )
+
+
+// ----------------------------------------------------------------------------
+// 6 · LOGÍSTICA  [pasta: 06 Logística]
+// ----------------------------------------------------------------------------
+
+/// Prazo médio entre pedido e entrega, em dias.
+Prazo Médio de Entrega =
+CALCULATE(
+    AVERAGE( fVendas[Prazo Entrega (dias)] ),
+    fVendas[LinhaConfiavel] = "Sim"
+)
+
+/// Percentual de itens entregues em até 5 dias.
+% Entregue em até 5 dias =
+VAR NoPrazo =
+    CALCULATE(
+        COUNTROWS( fVendas ),
+        fVendas[LinhaConfiavel] = "Sim",
+        fVendas[Prazo Entrega (dias)] <= 5
+    )
+VAR Total =
+    CALCULATE( COUNTROWS( fVendas ), fVendas[LinhaConfiavel] = "Sim" )
+RETURN
+    DIVIDE( NoPrazo, Total )
+
+/// Faturamento pela DATA DE ENTREGA, ativando a relação inativa.
+/// Compare com [Faturamento Líquido] para ver o efeito do prazo no mês.
+Faturamento por Entrega =
+CALCULATE(
+    [Faturamento Líquido],
+    USERELATIONSHIP( dCalendario[Data], fVendas[DataEntrega] )
+)
+
+
+// ----------------------------------------------------------------------------
+// 7 · AUDITORIA  [pasta: 99 Auditoria]
+// ----------------------------------------------------------------------------
+// Esta pasta é a primeira que se constrói num projeto sério e a última que
+// alguém elogia. Sem ela, o relatório mente com convicção.
+
+/// Total de linhas de fVendas, sem nenhum filtro de qualidade.
+Linhas na Origem = COUNTROWS( fVendas )
+
+/// Linhas com pelo menos um problema detectado.
+Linhas Suspeitas =
+CALCULATE( COUNTROWS( fVendas ), fVendas[MotivoSuspeita] <> "" )
+
+/// Proporção de linhas suspeitas. Acompanhe a tendência: se sobe, a origem
+/// piorou; se cai, o processo melhorou.
+% Linhas Suspeitas = DIVIDE( [Linhas Suspeitas], [Linhas na Origem] )
+
+/// Linhas excluídas dos números oficiais (data fora do calendário).
+Linhas Descartadas =
+CALCULATE( COUNTROWS( fVendas ), fVendas[LinhaConfiavel] = "Não" )
+
+/// Faturamento preso em vendas de produto sem cadastro.
+/// É o valor que o Comercial "perde de vista" até alguém cadastrar o item.
+Faturamento sem Cadastro de Produto =
+CALCULATE( [Faturamento Líquido], dProduto[Codigo] = "(sem cadastro)" )
+
+/// Quantos CNPJs têm mais de uma SK_Cliente.
+CNPJs Duplicados =
+COUNTROWS(
+    FILTER(
+        VALUES( dCliente[CNPJ] ),
+        CALCULATE( COUNTROWS( dCliente ), ALLEXCEPT( dCliente, dCliente[CNPJ] ) ) > 1
+    )
+)
+
+/// O erro que o cadastro duplicado causa na contagem de clientes.
+Erro na Contagem de Clientes =
+[Clientes Ativos (contando SK)] - [Clientes Ativos]
+
+/// Pares mês/vendedor com venda mas sem meta cadastrada.
+Meses sem Meta =
+COUNTROWS(
+    FILTER(
+        SUMMARIZE( fVendas, dMes[AnoMes], dVendedor[Vendedor] ),
+        ISBLANK( [Meta] ) && NOT ISBLANK( [Faturamento Líquido] )
+    )
+)
+
+/// O número "ingênuo": nenhum defeito tratado. Coloque-o ao lado do oficial
+/// numa página de auditoria — a diferença é o argumento para investir em
+/// qualidade de dados.
+Faturamento Ingênuo (sem tratamento) =
+SUMX(
+    fVendas,
+    fVendas[Quantidade] * fVendas[PrecoUnitario] * ( 1 - fVendas[Desconto] )
+)
+
+/// Diferença entre o número ingênuo e o oficial.
+Impacto dos Defeitos = [Faturamento Ingênuo (sem tratamento)] - [Faturamento Líquido]
+
+
+// ----------------------------------------------------------------------------
+// 8 · BLOCO PARA A EXIBIÇÃO DE CONSULTA DAX
+// ----------------------------------------------------------------------------
+// Cole o bloco abaixo na Exibição de Consulta DAX para TESTAR sem tocar no
+// modelo. Depois, "Atualizar modelo com alterações" grava as medidas — e os
+// comentários /// viram as descrições.
+
+/*
+DEFINE
+    /// Faturamento bruto: quantidade x preco, antes de descontos.
+    MEASURE '_Medidas'[Faturamento Bruto] =
+        CALCULATE(
+            SUMX( fVendas, fVendas[QuantidadeAjustada] * fVendas[PrecoUnitario] ),
+            fVendas[LinhaConfiavel] = "Sim"
+        )
+
+EVALUATE
+SUMMARIZECOLUMNS(
+    dCalendario[Ano],
+    "Faturamento Liquido", [Faturamento Líquido],
+    "Custo Total",         [Custo Total],
+    "Margem %",            [Margem %],
+    "Notas Fiscais",       [Notas Fiscais]
+)
+ORDER BY dCalendario[Ano]
+*/

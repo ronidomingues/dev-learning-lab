@@ -1,0 +1,32 @@
+/// Tabela SEM DADOS, criada só para hospedar as medidas.
+///
+/// Por que isso é boa prática, e não frescura:
+///   · Separa o QUE se calcula (medidas) de ONDE o dado mora (tabelas).
+///   · O painel Dados fica legível: uma pasta de medidas no topo, em vez de
+///     medidas espalhadas dentro de fVendas, fMetas e dProduto.
+///   · Renomear ou reorganizar tabelas de fato não move as medidas de lugar.
+///   · O usuário final nunca precisa abrir uma tabela de fato.
+///
+/// Como criar no Desktop: Página Inicial > Inserir dados > uma coluna qualquer
+/// > carregar > criar a primeira medida > ocultar a coluna. A tabela some da
+/// lista de tabelas e vira um "balde de medidas" com ícone próprio.
+///
+/// As definições estão em ../medidas.dax (arquivo de texto, versionável).
+table _Medidas
+
+	column Placeholder
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Placeholder
+
+	partition _Medidas = m
+		mode: import
+		source =
+				let
+				    Origem = #table(
+				        type table [Placeholder = text],
+				        {{"medidas"}}
+				    )
+				in
+				    Origem
